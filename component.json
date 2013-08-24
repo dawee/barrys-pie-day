@@ -1,0 +1,5 @@
+{
+  "name": "barrys-pie-day",
+  "paths": ["./lib"],
+  "local": ["boot"]
+}

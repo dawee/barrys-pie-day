@@ -1,0 +1,13 @@
+{
+  "name": "loop",
+  "repo": "gameponent/loop",
+  "description": "Component to run the Game lopp",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "lib/modestack.js",
+    "lib/eventhandler.js"
+  ]
+}

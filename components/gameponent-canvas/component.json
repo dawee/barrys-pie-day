@@ -1,0 +1,16 @@
+{
+  "name": "canvas",
+  "repo": "gameponent/canvas",
+  "description": "Component for canvas display",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "lib/canvas.js",
+    "lib/layer.js",
+    "lib/layergroup.js",
+    "lib/imageview.js",
+    "lib/drawable.js"
+  ]
+}

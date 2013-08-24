@@ -1,0 +1,11 @@
+{
+  "name": "loader",
+  "scripts": ["index.js"],
+  "dependencies": {
+    "gameponent/canvas": "*",
+    "gameponent/tile": "*",
+    "gameponent/sprite": "*",
+    "gameponent/loop": "*"
+  }
+
+}

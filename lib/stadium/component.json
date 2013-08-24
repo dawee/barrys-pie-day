@@ -1,0 +1,12 @@
+{
+  "name": "stadium",
+  "scripts": ["index.js"],
+  "dependencies": {
+    "gameponent/canvas": "*",
+    "gameponent/tile": "*",
+    "gameponent/sprite": "*",
+    "gameponent/loop": "*"
+  },
+  "local": ["barry"]
+
+}

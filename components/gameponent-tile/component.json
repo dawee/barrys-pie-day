@@ -1,0 +1,17 @@
+{
+  "name": "tile",
+  "repo": "gameponent/tile",
+  "description": "Component for Tileset imports and Tiles display",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "jofan/get-file": "*"
+  },
+  "scripts": [
+    "index.js",
+    "lib/tileset.js",
+    "lib/tile.js",
+    "lib/tilegroup.js"
+  ]
+}
