@@ -7,6 +7,6 @@
     "gameponent/sprite": "*",
     "gameponent/loop": "*"
   },
-  "local": ["loader", "stadium"]
+  "local": ["loader", "stadium", "map"]
 
 }

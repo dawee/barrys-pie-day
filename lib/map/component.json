@@ -1,12 +1,12 @@
 {
-  "name": "stadium",
+  "name": "map",
   "scripts": ["index.js"],
   "dependencies": {
     "gameponent/canvas": "*",
     "gameponent/tile": "*",
     "gameponent/sprite": "*",
-    "gameponent/loop": "*"
-  },
-  "local": ["barry", "map"]
+    "gameponent/loop": "*",
+    "component/clone": "*"
+  }
 
 }

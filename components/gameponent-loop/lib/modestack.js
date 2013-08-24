@@ -14,6 +14,9 @@ ModeStack.prototype.setMouseArea = function (options) {
 ModeStack.prototype.set = function (options) {
     this.mode = options.mode;
     this.eventHandler.setListener({listener: this.mode});
+    if (this.mode !== null && typeof this.mode.reset === 'function') {
+        this.mode.reset();
+    }
 };
 
 ModeStack.prototype.push = function (options) {
