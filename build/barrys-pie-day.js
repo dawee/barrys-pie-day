@@ -1209,7 +1209,8 @@ Map.prototype.init = function (options) {\n\
         Area.define({left: 8, top: 120, width: 45, height: 45, callback: this.goToStadium.bind(this)}),\n\
         Area.define({left: 52, top: 128, width: 40, height: 22, callback: this.goToPhotograph.bind(this)}),\n\
         Area.define({left: 269, top: 110, width: 40, height: 30, callback: this.goToLake.bind(this)}),\n\
-        Area.define({left: 190, top: 94, width: 45, height: 34, callback: this.goToTheater.bind(this)})\n\
+        Area.define({left: 190, top: 94, width: 45, height: 34, callback: this.goToTheater.bind(this)}),\n\
+        Area.define({left: 44, top: 53, width: 36, height: 21, callback: this.goToPizzeria.bind(this)})\n\
     ]});\n\
     this.tilesets = options.tilesets;\n\
     this.layer.addView({view: new canvas.ImageView({\n\
@@ -1235,6 +1236,10 @@ Map.prototype.goToLake = function () {\n\
 \n\
 Map.prototype.goToTheater = function () {\n\
     loop.setMode({mode: this.places.theater});\n\
+};\n\
+\n\
+Map.prototype.goToPizzeria = function () {\n\
+    loop.setMode({mode: this.places.pizzeria});\n\
 };\n\
 \n\
 Map.prototype.reset = function() {\n\
@@ -1435,6 +1440,67 @@ Theater.prototype.draw = function () {\n\
 \n\
 module.exports = new Theater();//@ sourceURL=theater/index.js"
 ));
+require.register("pizzeria/index.js", Function("exports, require, module",
+"var canvas = require('canvas');\n\
+var sprite = require('sprite');\n\
+var Barry = require('barry');\n\
+var loop = require('loop');\n\
+var map = require('map');\n\
+\n\
+function Pizzeria() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
+\n\
+Pizzeria.prototype.init = function (options) {\n\
+    this.screen = options.screen;\n\
+    this.tilesets = options.tilesets;\n\
+    this.layer.addView({view: new canvas.ImageView({\n\
+        image: this.tilesets.bg_a.groups.pizzeria.tile(),\n\
+        x: 160,\n\
+        y: 64\n\
+    })});\n\
+    this.barry = new Barry({\n\
+        screen: this.screen,\n\
+        tilesets: this.tilesets,\n\
+        x: 150,\n\
+        y: 50\n\
+    });\n\
+\n\
+    this.layer.addView({view: this.barry});\n\
+    return this;\n\
+};\n\
+\n\
+Pizzeria.prototype.reset = function() {\n\
+    this.screen.root = this.root;\n\
+};\n\
+\n\
+Pizzeria.prototype.onMouseDown = function (event) {\n\
+    var options = event;\n\
+    var that = this;\n\
+    \n\
+    options.callback = function () {\n\
+        if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
+            loop.setMode({mode: map});\n\
+        }\n\
+\n\
+    };\n\
+    \n\
+    this.barry.walkTo(event);\n\
+};\n\
+\n\
+Pizzeria.prototype.update = function () {\n\
+    this.barry.step();\n\
+};\n\
+\n\
+Pizzeria.prototype.draw = function () {\n\
+    this.screen.draw();\n\
+};\n\
+\n\
+\n\
+module.exports = new Pizzeria();//@ sourceURL=pizzeria/index.js"
+));
 require.register("boot/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var gameEl = document.getElementById('game');\n\
@@ -1448,6 +1514,8 @@ var stadium = require('stadium');\n\
 var photograph = require('photograph');\n\
 var lake = require('lake');\n\
 var theater = require('theater');\n\
+var pizzeria = require('pizzeria');\n\
+\n\
 \n\
 sprite.Sprite.fps = 10;\n\
 \n\
@@ -1473,7 +1541,8 @@ tile.load({url: '/static/assets/tilesets', success: function (options) {\n\
             stadium: stadium.init(opt),\n\
             photograph: photograph.init(opt),\n\
             lake: lake.init(opt),\n\
-            theater: theater.init(opt)\n\
+            theater: theater.init(opt),\n\
+            pizzeria: pizzeria.init(opt)\n\
         }});\n\
         \n\
 \n\
@@ -1483,6 +1552,7 @@ tile.load({url: '/static/assets/tilesets', success: function (options) {\n\
 \n\
 }});//@ sourceURL=boot/index.js"
 ));
+
 
 
 
@@ -2203,6 +2273,165 @@ require.alias("component-clone/index.js", "barry/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("map/index.js", "theater/deps/map/index.js");
+require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "map/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "map/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "map/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "map/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "map/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "map/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "map/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "map/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "map/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "map/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "map/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "map/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "map/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "map/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "map/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "map/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "map/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "map/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("pizzeria/index.js", "boot/deps/pizzeria/index.js");
+require.alias("gameponent-canvas/index.js", "pizzeria/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "pizzeria/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "pizzeria/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "pizzeria/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "pizzeria/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "pizzeria/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "pizzeria/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "pizzeria/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "pizzeria/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "pizzeria/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "pizzeria/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "pizzeria/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "pizzeria/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "pizzeria/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "pizzeria/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "pizzeria/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "pizzeria/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "pizzeria/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("barry/index.js", "pizzeria/deps/barry/index.js");
+require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "barry/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "barry/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "barry/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "barry/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "barry/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "barry/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "barry/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "barry/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "barry/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "barry/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "barry/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "barry/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "barry/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "barry/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "barry/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "barry/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "barry/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("map/index.js", "pizzeria/deps/map/index.js");
 require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "map/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "map/deps/canvas/lib/layer.js");
