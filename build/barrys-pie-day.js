@@ -919,14 +919,17 @@ function _walk(barry) {\n\
 }\n\
 \n\
 Barry.prototype.walkTo = function (options) {\n\
-    this.target = (options.offsetX * this.screen.viewport.width) / this.screen.width;\n\
-    this.callback = options.callback || function () {};\n\
-    this.direction = (this.target > this.x) ? 1 : -1;\n\
+    var target = (options.offsetX * this.screen.viewport.width) / this.screen.width;\n\
+    if (target !== this.x) {\n\
+        this.target = target;\n\
+        this.callback = options.callback || function () {};\n\
+        this.direction = (this.target > this.x) ? 1 : -1;\n\
 \n\
-    if (this.target > this.x) {\n\
-        this.loop({animation: 'walk_right'});\n\
-    } else {\n\
-        this.loop({animation: 'walk_left'});\n\
+        if (this.target > this.x) {\n\
+            this.loop({animation: 'walk_right'});\n\
+        } else {\n\
+            this.loop({animation: 'walk_left'});\n\
+        }\n\
     }\n\
 };\n\
 \n\
@@ -944,14 +947,15 @@ var Barry = require('barry');\n\
 var loop = require('loop');\n\
 var map = require('map');\n\
 \n\
-function Stadium() {}\n\
+function Stadium() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
 \n\
 Stadium.prototype.init = function (options) {\n\
     this.screen = options.screen;\n\
     this.tilesets = options.tilesets;\n\
-    this.root = new canvas.LayerGroup();\n\
-    this.layer = new canvas.Layer();\n\
-    this.root.addLayer({layer: this.layer});\n\
     this.layer.addView({view: new canvas.ImageView({\n\
         image: this.tilesets.bg_b.groups.stadium.tile(),\n\
         x: 160,\n\
@@ -965,6 +969,7 @@ Stadium.prototype.init = function (options) {\n\
     });\n\
 \n\
     this.layer.addView({view: this.barry});\n\
+    return this;\n\
 };\n\
 \n\
 Stadium.prototype.reset = function() {\n\
@@ -976,7 +981,7 @@ Stadium.prototype.onMouseDown = function (event) {\n\
     var that = this;\n\
     \n\
     options.callback = function () {\n\
-        if (that.barry.x > that.screen.viewport.width / 5) {\n\
+        if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
             loop.setMode({mode: map});\n\
         }\n\
 \n\
@@ -1169,7 +1174,6 @@ Area.prototype.onMouseDown = function (options) {\n\
     });\n\
     \n\
     this.clickAreas.forEach(function (area) {\n\
-        console.log(area, point);\n\
         if (area.contains({point: point})) {\n\
             area.callback();\n\
         }\n\
@@ -1188,6 +1192,7 @@ require.register("map/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var sprite = require('sprite');\n\
 var Area = require('area');\n\
+var loop = require('loop');\n\
 \n\
 function Map() {\n\
     this.root = new canvas.LayerGroup();\n\
@@ -1196,9 +1201,13 @@ function Map() {\n\
 }\n\
 \n\
 Map.prototype.init = function (options) {\n\
+    var that = this;\n\
+\n\
+    this.places = options.places;\n\
     this.screen = options.screen;\n\
     this.areas = new Area({screen: this.screen, click: [\n\
-        Area.define({left: 0, top: this.screen.viewport.height, width: 100, height: 100, callback: this.onAreaClicked})\n\
+        Area.define({left: 8, top: 120, width: 45, height: 45, callback: this.goToStadium.bind(this)}),\n\
+        Area.define({left: 52, top: 128, width: 40, height: 22, callback: this.goToPhotograph.bind(this)})\n\
     ]});\n\
     this.tilesets = options.tilesets;\n\
     this.layer.addView({view: new canvas.ImageView({\n\
@@ -1206,10 +1215,16 @@ Map.prototype.init = function (options) {\n\
         x: 160,\n\
         y: 64\n\
     })});\n\
+\n\
+    return this;\n\
 };\n\
 \n\
-Map.prototype.onAreaClicked = function () {\n\
-    console.log('clicked');\n\
+Map.prototype.goToStadium = function () {\n\
+    loop.setMode({mode: this.places.stadium});\n\
+};\n\
+\n\
+Map.prototype.goToPhotograph = function () {\n\
+    loop.setMode({mode: this.places.photograph});\n\
 };\n\
 \n\
 Map.prototype.reset = function() {\n\
@@ -1227,6 +1242,67 @@ Map.prototype.draw = function () {\n\
 \n\
 module.exports = new Map();//@ sourceURL=map/index.js"
 ));
+require.register("photograph/index.js", Function("exports, require, module",
+"var canvas = require('canvas');\n\
+var sprite = require('sprite');\n\
+var Barry = require('barry');\n\
+var loop = require('loop');\n\
+var map = require('map');\n\
+\n\
+function Photograph() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
+\n\
+Photograph.prototype.init = function (options) {\n\
+    this.screen = options.screen;\n\
+    this.tilesets = options.tilesets;\n\
+    this.layer.addView({view: new canvas.ImageView({\n\
+        image: this.tilesets.bg_b.groups.photograph.tile(),\n\
+        x: 160,\n\
+        y: 64\n\
+    })});\n\
+    this.barry = new Barry({\n\
+        screen: this.screen,\n\
+        tilesets: this.tilesets,\n\
+        x: 250,\n\
+        y: 65\n\
+    });\n\
+\n\
+    this.layer.addView({view: this.barry});\n\
+    return this;\n\
+};\n\
+\n\
+Photograph.prototype.reset = function() {\n\
+    this.screen.root = this.root;\n\
+};\n\
+\n\
+Photograph.prototype.onMouseDown = function (event) {\n\
+    var options = event;\n\
+    var that = this;\n\
+    \n\
+    options.callback = function () {\n\
+        if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
+            loop.setMode({mode: map});\n\
+        }\n\
+\n\
+    };\n\
+    \n\
+    this.barry.walkTo(event);\n\
+};\n\
+\n\
+Photograph.prototype.update = function () {\n\
+    this.barry.step();\n\
+};\n\
+\n\
+Photograph.prototype.draw = function () {\n\
+    this.screen.draw();\n\
+};\n\
+\n\
+\n\
+module.exports = new Photograph();//@ sourceURL=photograph/index.js"
+));
 require.register("boot/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var gameEl = document.getElementById('game');\n\
@@ -1235,8 +1311,9 @@ var sprite = require('sprite');\n\
 var loop = require('loop');\n\
 var loader = require('loader');\n\
 \n\
-var stadium = require('stadium');\n\
 var map = require('map');\n\
+var stadium = require('stadium');\n\
+var photograph = require('photograph');\n\
 \n\
 sprite.Sprite.fps = 10;\n\
 \n\
@@ -1256,8 +1333,13 @@ gameEl.appendChild(board);\n\
 \n\
 tile.load({url: '/static/assets/tilesets', success: function (options) {\n\
     loader.load({tilesets: options.tilesets, callback: function () {\n\
-        map.init({screen: screen, tilesets: options.tilesets});\n\
-        stadium.init({screen: screen, tilesets: options.tilesets});\n\
+        var opt = {screen: screen, tilesets: options.tilesets};\n\
+\n\
+        map.init({screen: screen, tilesets: options.tilesets, places: {\n\
+            stadium: stadium.init(opt),\n\
+            photograph: photograph.init(opt)\n\
+        }});\n\
+        \n\
 \n\
         loop.setMode({mode: stadium});\n\
         loop.start({mouseArea: screen.el});\n\
@@ -1265,6 +1347,7 @@ tile.load({url: '/static/assets/tilesets', success: function (options) {\n\
 \n\
 }});//@ sourceURL=boot/index.js"
 ));
+
 
 
 
@@ -1505,6 +1588,165 @@ require.alias("component-clone/index.js", "area/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("map/index.js", "boot/deps/map/index.js");
+require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "map/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "map/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "map/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "map/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "map/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "map/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "map/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "map/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "map/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "map/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "map/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "map/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "map/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "map/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "map/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "map/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "map/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "map/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("photograph/index.js", "boot/deps/photograph/index.js");
+require.alias("gameponent-canvas/index.js", "photograph/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "photograph/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "photograph/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "photograph/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "photograph/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "photograph/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "photograph/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "photograph/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "photograph/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "photograph/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "photograph/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "photograph/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "photograph/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "photograph/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "photograph/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "photograph/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "photograph/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "photograph/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("barry/index.js", "photograph/deps/barry/index.js");
+require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "barry/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "barry/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "barry/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "barry/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "barry/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "barry/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "barry/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "barry/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "barry/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "barry/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "barry/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "barry/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "barry/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "barry/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "barry/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "barry/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "barry/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("map/index.js", "photograph/deps/map/index.js");
 require.alias("gameponent-canvas/index.js", "map/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "map/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "map/deps/canvas/lib/layer.js");
