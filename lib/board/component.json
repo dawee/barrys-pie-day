@@ -1,0 +1,11 @@
+{
+  "name": "board",
+  "scripts": ["index.js", "verbsdesk.js"],
+  "dependencies": {
+    "gameponent/canvas": "*",
+    "gameponent/tile": "*",
+    "gameponent/sprite": "*",
+    "gameponent/loop": "*",
+    "component/clone": "*"
+  }
+}

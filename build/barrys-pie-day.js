@@ -1699,6 +1699,48 @@ ClockRepair.prototype.draw = function () {\n\
 \n\
 module.exports = new ClockRepair();//@ sourceURL=clock-repair/index.js"
 ));
+require.register("board/index.js", Function("exports, require, module",
+"var VerbsDesk = require('./verbsdesk');\n\
+\n\
+function Board() {\n\
+    this.el = document.createElement('div');\n\
+    this.el.setAttribute('class', 'board');\n\
+    this.verbsDesk = new VerbsDesk();\n\
+}\n\
+\n\
+Board.prototype.render = function () {\n\
+    this.statusLine = document.createElement('div');\n\
+    this.statusLine.setAttribute('class', 'status-line');\n\
+    this.el.appendChild(this.statusLine);\n\
+    this.el.appendChild(this.verbsDesk.render().el);\n\
+    return this;    \n\
+};\n\
+\n\
+module.exports = new Board();//@ sourceURL=board/index.js"
+));
+require.register("board/verbsdesk.js", Function("exports, require, module",
+"var verbs = [\n\
+    'GET', 'TAKE', 'USE',\n\
+    'GO TO', 'LOOK AT', 'TALK'\n\
+];\n\
+\n\
+function VerbsDesk() {\n\
+    this.el = document.createElement('div');\n\
+    this.el.setAttribute('class', 'verbs-desk');\n\
+}\n\
+\n\
+VerbsDesk.prototype.render = function () {\n\
+    verbs.forEach(function (verb) {\n\
+        var el = document.createElement('div');\n\
+        el.setAttribute('class', 'verb');\n\
+        el.appendChild(document.createTextNode(verb));\n\
+        this.el.appendChild(el);\n\
+    }, this);\n\
+    return this;\n\
+};\n\
+\n\
+module.exports = VerbsDesk;//@ sourceURL=board/verbsdesk.js"
+));
 require.register("boot/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var gameEl = document.getElementById('game');\n\
@@ -1707,6 +1749,7 @@ var sprite = require('sprite');\n\
 var loop = require('loop');\n\
 var loader = require('loader');\n\
 \n\
+var board = require('board');\n\
 var map = require('map');\n\
 var stadium = require('stadium');\n\
 var photograph = require('photograph');\n\
@@ -1729,9 +1772,7 @@ var screen = new canvas.Canvas({\n\
     parent: gameEl\n\
 });\n\
 \n\
-var board = document.createElement('div');\n\
-board.setAttribute('class', 'board');\n\
-gameEl.appendChild(board);\n\
+gameEl.appendChild(board.render().el);\n\
 \n\
 var url = location.host.match(/github/) ? '/barrys-pie-day/static/assets/tilesets' : '/static/assets/tilesets';\n\
 \n\
@@ -1757,6 +1798,7 @@ tile.load({url: url, success: function (options) {\n\
 }});\n\
 //@ sourceURL=boot/index.js"
 ));
+
 
 
 
@@ -3044,4 +3086,44 @@ require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
 require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
 require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
 require.alias("component-clone/index.js", "area/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("board/index.js", "boot/deps/board/index.js");
+require.alias("board/verbsdesk.js", "boot/deps/board/verbsdesk.js");
+require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "board/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "board/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "board/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "board/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "board/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "board/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "board/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "board/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "board/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "board/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "board/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "board/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");

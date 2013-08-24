@@ -1,5 +1,9 @@
+@import url(http://fonts.googleapis.com/css?family=Press+Start+2P);
+
 body {
     background-color: black;
+    font-family: 'Press Start 2P', cursive;
+    color: white;
 }
 
 #game {
@@ -23,4 +27,21 @@ body {
     left: 0;
     bottom: 0;
     right: 0;
+}
+
+.board .status-line {
+    height: 50px;
+    width: 100%;
+    text-align: center;
+}
+
+.verbs-desk {
+    width: 100%
+}
+
+.verbs-desk .verb {
+    display: inline-block;
+    font-size: 22px;
+    width: 33%;
+    height: 40px;
 }

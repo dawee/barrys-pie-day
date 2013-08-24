@@ -7,6 +7,17 @@
     "gameponent/sprite": "*",
     "gameponent/loop": "*"
   },
-  "local": ["loader", "stadium", "map", "photograph", "lake", "theater", "pizzeria", "bakery", "clock-repair"]
+  "local": [
+    "loader",
+    "stadium",
+    "map",
+    "photograph",
+    "lake",
+    "theater",
+    "pizzeria",
+    "bakery",
+    "clock-repair",
+    "board"
+  ]
 
 }
