@@ -1,5 +1,5 @@
 {
-  "name": "boot",
+  "name": "theater",
   "scripts": ["index.js"],
   "dependencies": {
     "gameponent/canvas": "*",
@@ -7,6 +7,6 @@
     "gameponent/sprite": "*",
     "gameponent/loop": "*"
   },
-  "local": ["loader", "stadium", "map", "photograph", "lake", "theater"]
+  "local": ["barry", "map"]
 
 }
