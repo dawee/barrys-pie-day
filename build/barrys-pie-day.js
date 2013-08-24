@@ -919,7 +919,9 @@ function _walk(barry) {\n\
 }\n\
 \n\
 Barry.prototype.walkTo = function (options) {\n\
-    var target = (options.offsetX * this.screen.viewport.width) / this.screen.width;\n\
+    var x = options.offsetX === undefined ? options.layerX : options.offsetX;\n\
+    var target = (x * this.screen.viewport.width) / this.screen.width;\n\
+\n\
     if (target !== this.x) {\n\
         this.target = target;\n\
         this.callback = options.callback || function () {};\n\
@@ -983,7 +985,7 @@ Stadium.prototype.reset = function() {\n\
 Stadium.prototype.onMouseDown = function (event) {\n\
     var options = event;\n\
     var that = this;\n\
-    \n\
+\n\
     options.callback = function () {\n\
         if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
             loop.setMode({mode: map});\n\
@@ -1229,9 +1231,12 @@ function Area(options) {\n\
 }\n\
 \n\
 Area.prototype.onMouseDown = function (options) {\n\
+    var x = options.offsetX === undefined ? options.layerX : options.offsetX;\n\
+    var y = options.offsetY === undefined ? options.layerY : options.offsetY;\n\
+\n\
     var point = new geom.Point({\n\
-        x: (options.offsetX * this.screen.viewport.width) / this.screen.width,\n\
-        y: this.screen.viewport.height - ((options.offsetY * this.screen.viewport.height) / this.screen.height)\n\
+        x: (x * this.screen.viewport.width) / this.screen.width,\n\
+        y: this.screen.viewport.height - ((y * this.screen.viewport.height) / this.screen.height)\n\
     });\n\
     \n\
     this.clickAreas.forEach(function (area) {\n\
@@ -1749,7 +1754,8 @@ tile.load({url: url, success: function (options) {\n\
         loop.start({mouseArea: screen.el});\n\
     }});\n\
 \n\
-}});//@ sourceURL=boot/index.js"
+}});\n\
+//@ sourceURL=boot/index.js"
 ));
 
 
