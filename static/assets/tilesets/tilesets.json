@@ -1,6 +1,56 @@
 {
   "tilesets": [
     {
+      "name": "judges", 
+      "groups": [
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 0, 
+              "x": 0, 
+              "height": 61, 
+              "name": "judge_woman_sit_0", 
+              "width": 34
+            }
+          ], 
+          "name": "judge_woman_sit"
+        }, 
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 61, 
+              "x": 0, 
+              "height": 25, 
+              "name": "judge_glass_sit_0", 
+              "width": 22
+            }
+          ], 
+          "name": "judge_glass_sit"
+        }, 
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 86, 
+              "x": 0, 
+              "height": 28, 
+              "name": "judge_young_sit_0", 
+              "width": 25
+            }
+          ], 
+          "name": "judge_young_sit"
+        }
+      ]
+    }, 
+    {
       "name": "barry", 
       "groups": [
         {

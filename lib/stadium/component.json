@@ -1,11 +1,12 @@
 {
   "name": "stadium",
-  "scripts": ["index.js"],
+  "scripts": ["index.js", "judgewoman.js", "judgeglass.js", "judgeyoung.js"],
   "dependencies": {
     "gameponent/canvas": "*",
     "gameponent/tile": "*",
     "gameponent/sprite": "*",
-    "gameponent/loop": "*"
+    "gameponent/loop": "*",
+    "component/clone": "*"
   },
   "local": ["barry", "map"]
 

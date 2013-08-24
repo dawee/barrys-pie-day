@@ -946,6 +946,9 @@ var sprite = require('sprite');\n\
 var Barry = require('barry');\n\
 var loop = require('loop');\n\
 var map = require('map');\n\
+var JudgeWoman = require('./judgewoman');\n\
+var JudgeGlass = require('./judgeglass');\n\
+var JudgeYoung = require('./judgeyoung');\n\
 \n\
 function Stadium() {\n\
     this.root = new canvas.LayerGroup();\n\
@@ -961,14 +964,15 @@ Stadium.prototype.init = function (options) {\n\
         x: 160,\n\
         y: 64\n\
     })});\n\
-    this.barry = new Barry({\n\
-        screen: this.screen,\n\
-        tilesets: this.tilesets,\n\
-        x: 150,\n\
-        y: 50\n\
-    });\n\
-\n\
+    this.barry = new Barry({screen: this.screen, tilesets: this.tilesets, x: 150, y: 50});\n\
+    this.judgeYoung = new JudgeYoung({screen: this.screen, tilesets: this.tilesets, x: 49, y: 100});\n\
+    this.judgeGlass = new JudgeGlass({screen: this.screen, tilesets: this.tilesets, x: 40, y: 88});\n\
+    this.judgeWoman = new JudgeWoman({screen: this.screen, tilesets: this.tilesets, x: 28, y: 66});\n\
     this.layer.addView({view: this.barry});\n\
+\n\
+    this.layer.addView({view: this.judgeYoung});\n\
+    this.layer.addView({view: this.judgeGlass});\n\
+    this.layer.addView({view: this.judgeWoman});\n\
     return this;\n\
 };\n\
 \n\
@@ -992,6 +996,9 @@ Stadium.prototype.onMouseDown = function (event) {\n\
 \n\
 Stadium.prototype.update = function () {\n\
     this.barry.step();\n\
+    this.judgeWoman.step();\n\
+    this.judgeGlass.step();\n\
+    this.judgeYoung.step();\n\
 };\n\
 \n\
 Stadium.prototype.draw = function () {\n\
@@ -1000,6 +1007,60 @@ Stadium.prototype.draw = function () {\n\
 \n\
 \n\
 module.exports = new Stadium();//@ sourceURL=stadium/index.js"
+));
+require.register("stadium/judgewoman.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+\n\
+function JudgeWoman(options) {\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_woman_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+}\n\
+\n\
+JudgeWoman.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+module.exports = JudgeWoman;//@ sourceURL=stadium/judgewoman.js"
+));
+require.register("stadium/judgeglass.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+\n\
+function JudgeGlass(options) {\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_glass_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+}\n\
+\n\
+JudgeGlass.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+module.exports = JudgeGlass;//@ sourceURL=stadium/judgeglass.js"
+));
+require.register("stadium/judgeyoung.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+\n\
+function JudgeYoung(options) {\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_young_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+}\n\
+\n\
+JudgeYoung.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+module.exports = JudgeYoung;//@ sourceURL=stadium/judgeyoung.js"
 ));
 require.register("gameponent-geom/index.js", Function("exports, require, module",
 "exports.Vector = require('./lib/vector');\n\
@@ -1775,6 +1836,9 @@ require.alias("gameponent-loop/lib/eventhandler.js", "loader/deps/loop/lib/event
 require.alias("gameponent-loop/index.js", "loader/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
 require.alias("stadium/index.js", "boot/deps/stadium/index.js");
+require.alias("stadium/judgewoman.js", "boot/deps/stadium/judgewoman.js");
+require.alias("stadium/judgeglass.js", "boot/deps/stadium/judgeglass.js");
+require.alias("stadium/judgeyoung.js", "boot/deps/stadium/judgeyoung.js");
 require.alias("gameponent-canvas/index.js", "stadium/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "stadium/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "stadium/deps/canvas/lib/layer.js");
@@ -1810,6 +1874,9 @@ require.alias("gameponent-loop/lib/modestack.js", "stadium/deps/loop/lib/modesta
 require.alias("gameponent-loop/lib/eventhandler.js", "stadium/deps/loop/lib/eventhandler.js");
 require.alias("gameponent-loop/index.js", "stadium/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "stadium/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
 require.alias("barry/index.js", "stadium/deps/barry/index.js");
 require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "barry/deps/canvas/lib/canvas.js");
