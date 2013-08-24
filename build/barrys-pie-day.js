@@ -1728,7 +1728,7 @@ var board = document.createElement('div');\n\
 board.setAttribute('class', 'board');\n\
 gameEl.appendChild(board);\n\
 \n\
-tile.load({url: '/static/assets/tilesets', success: function (options) {\n\
+tile.load({url: location.protocol + '//' + location.host + location.pathname + 'static/assets/tilesets', success: function (options) {\n\
     loader.load({tilesets: options.tilesets, callback: function () {\n\
         var opt = {screen: screen, tilesets: options.tilesets};\n\
 \n\
