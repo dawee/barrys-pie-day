@@ -1,13 +1,13 @@
 {
-  "name": "map",
+  "name": "area",
   "scripts": ["index.js"],
   "dependencies": {
     "gameponent/canvas": "*",
     "gameponent/tile": "*",
     "gameponent/sprite": "*",
     "gameponent/loop": "*",
+    "gameponent/geom": "*",
     "component/clone": "*"
-  },
-  "local": ["area"]
+  }
 
 }
