@@ -105,11 +105,11 @@
               "y": 128, 
               "x": 0, 
               "height": 128, 
-              "name": "sidewalk_0", 
+              "name": "bakery_0", 
               "width": 320
             }
           ], 
-          "name": "sidewalk"
+          "name": "bakery"
         }, 
         {
           "infos": {
