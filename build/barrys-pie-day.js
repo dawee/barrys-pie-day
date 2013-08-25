@@ -1503,7 +1503,7 @@ var areas = {\n\
             // TODO : loop.setMode({mode: places.photograph});\n\
         },\n\
         hover: function () {\n\
-            board.setSubject({name: 'Photograph'});\n\
+            board.setSubject({name: 'Photograph (Not implemented yet)'});\n\
         }\n\
     }),\n\
 \n\
@@ -1516,7 +1516,7 @@ var areas = {\n\
             // TODO : loop.setMode({mode: places.lake});    \n\
         },\n\
         hover: function () {\n\
-            board.setSubject({name: 'Lake'});\n\
+            board.setSubject({name: 'Lake (Not implemented yet)'});\n\
         }\n\
     }),\n\
 \n\
@@ -1529,7 +1529,7 @@ var areas = {\n\
             // TODO : loop.setMode({mode: places.theater});\n\
         },\n\
         hover: function () {\n\
-            board.setSubject({name: 'Theater'});\n\
+            board.setSubject({name: 'Theater (Not implemented yet)'});\n\
         }\n\
     }),\n\
 \n\
@@ -1568,7 +1568,7 @@ var areas = {\n\
             // TODO : loop.setMode({mode: places.clockRepair});\n\
         },\n\
         hover: function () {\n\
-            board.setSubject({name: 'Clock Repair'});\n\
+            board.setSubject({name: 'Clock Repair (Not implemented yet)'});\n\
         }\n\
     })\n\
 \n\
@@ -1822,6 +1822,8 @@ var Barry = require('barry');\n\
 var loop = require('loop');\n\
 var map = require('map');\n\
 var board = require('board');\n\
+var Area = require('area');\n\
+var Pizzaiolo = require('./pizzaiolo');\n\
 \n\
 function Pizzeria() {\n\
     this.root = new canvas.LayerGroup();\n\
@@ -1837,14 +1839,42 @@ Pizzeria.prototype.init = function (options) {\n\
         x: 160,\n\
         y: 64\n\
     })});\n\
+    this.pizzaiolo = new Pizzaiolo({screen: this.screen, tilesets: this.tilesets, x: 145, y: 112});\n\
+    this.layer.addView({view: this.pizzaiolo});\n\
+\n\
     this.barry = new Barry({\n\
         screen: this.screen,\n\
         tilesets: this.tilesets,\n\
         x: 150,\n\
         y: 50\n\
     });\n\
-\n\
     this.layer.addView({view: this.barry});\n\
+\n\
+    var town = Area.define({\n\
+        left: 0,\n\
+        top: this.screen.viewport.height / 8.0,\n\
+        width: this.screen.viewport.width,\n\
+        height: this.screen.viewport.height / 8.0,\n\
+        hover: function () {\n\
+            board.setSubject(town);\n\
+        },\n\
+        click: function () {\n\
+            this.x = this.left;\n\
+            board.setSubject(town);\n\
+            if (board.is(['judge-woman:talk:first', 'judge-glass:talk:first', 'judge-young:talk:first'])) {\n\
+                loop.setMode({mode: map});\n\
+            } else {\n\
+                board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges', talker: 'barry'});\n\
+            }\n\
+        },\n\
+        go: function () {}\n\
+    });\n\
+    town.name = 'TOWN';\n\
+\n\
+\n\
+    this.areas = new Area({screen: this.screen, areas: [\n\
+        town, this.pizzaiolo\n\
+    ]});\n\
     return this;\n\
 };\n\
 \n\
@@ -1858,19 +1888,26 @@ Pizzeria.prototype.onMouseDown = function (event) {\n\
     var that = this;\n\
 \n\
     board.setSubject(event);\n\
-    \n\
+\n\
     options.callback = function () {\n\
         if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
             loop.setMode({mode: map});\n\
         }\n\
 \n\
     };\n\
-\n\
+    this.areas.onMouseDown(event);\n\
     board.activate();\n\
 };\n\
 \n\
+Pizzeria.prototype.onMouseMove = function (event) {\n\
+    board.setSubject(event);\n\
+    this.areas.onMouseMove(event);\n\
+};\n\
+\n\
+\n\
 Pizzeria.prototype.update = function () {\n\
     this.barry.step();\n\
+    this.pizzaiolo.step();\n\
 };\n\
 \n\
 Pizzeria.prototype.draw = function () {\n\
@@ -1879,6 +1916,130 @@ Pizzeria.prototype.draw = function () {\n\
 \n\
 \n\
 module.exports = new Pizzeria();//@ sourceURL=pizzeria/index.js"
+));
+require.register("pizzeria/pizzaiolo.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+var Area = require('area');\n\
+var board = require('board');\n\
+\n\
+var items = {\n\
+    'pizzaiolo-business-card': {\n\
+        name: 'Business Card',\n\
+        id: 'pizzaiolo-business-card'\n\
+    }\n\
+\n\
+};\n\
+\n\
+function Pizzaiolo(options) {\n\
+    this.name = \"PIZZAIOLO\";\n\
+\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.pnj;\n\
+    options.animation = 'pizzaiolo_stand';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+    this.left = this.x - this.width / 2;\n\
+    this.top = this.y + this.height / 2;\n\
+    this.width = this.image.width;\n\
+    this.height = this.image.height;    \n\
+}\n\
+\n\
+Pizzaiolo.prototype = clone(sprite.Sprite.prototype);\n\
+Pizzaiolo.prototype.contains = Area.Rect.prototype.contains;\n\
+\n\
+Pizzaiolo.prototype.hover = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+Pizzaiolo.prototype.click = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+Pizzaiolo.prototype.talk = function () {\n\
+    if (!board.is('pizzaiolo:talk:0')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello Sir ! Welcome to Pizza Nut', talker: 'pizzaiolo'},\n\
+                {text: 'Nut ? You mean Pizza ...', talker: 'barry'},\n\
+                {text: 'No sir', talker: 'pizzaiolo'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('pizzaiolo:talk:0', true);\n\
+            }\n\
+        });\n\
+    } else if (!board.is('pizzaiolo:talk:1')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello Sir ! Welcome to Pizza Nut', talker: 'pizzaiolo'},\n\
+                {text: 'What kind of pizza do you have ?', talker: 'barry'},\n\
+                {text: 'We have plenty of flavours sir !', talker: 'pizzaiolo'},\n\
+                {text: 'We have salted, sweet', talker: 'pizzaiolo'},\n\
+                {text: 'With meat, or with bacon', talker: 'pizzaiolo'},\n\
+                {text: 'With laurel, that one comes from my neighbor\\'s garden', talker: 'pizzaiolo'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('pizzaiolo:talk:1', true);\n\
+            }\n\
+        });\n\
+    }  else if (!board.is('pizzaiolo:talk:2')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello Sir ! Welcome to Pizza Nut', talker: 'pizzaiolo'},\n\
+                {text: 'Sorry, I don\\'t remember your pizzas flavours', talker: 'barry'},\n\
+                {text: 'No probleme sir !', talker: 'pizzaiolo'},\n\
+                {text: 'We have salted, sweet', talker: 'pizzaiolo'},\n\
+                {text: 'With meat, or with bacon', talker: 'pizzaiolo'},\n\
+                {text: 'With laurel, that one comes from my neighbor\\'s garden', talker: 'pizzaiolo'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('pizzaiolo:talk:2', true);\n\
+            }\n\
+        });\n\
+    } else if (!board.is('pizzaiolo:talk:3')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello Sir ! Welcome to Pizza Nut', talker: 'pizzaiolo'},\n\
+                {text: 'Could you tell me another time', talker: 'barry'},\n\
+                {text: 'Okay ... But maybe you could note it this time sir ?', talker: 'pizzaiolo'},\n\
+                {text: 'We have salted, sweet', talker: 'pizzaiolo'},\n\
+                {text: 'With meat, or with bacon', talker: 'pizzaiolo'},\n\
+                {text: 'With laurel, that one comes from my neighbor\\'s garden', talker: 'pizzaiolo'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('pizzaiolo:talk:3', true);\n\
+            }\n\
+        });\n\
+    } else if (!board.is('pizzaiolo:talk:4')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello Sir ! Welcome to Pizza Nut', talker: 'pizzaiolo'},\n\
+                {text: 'Sorry, another time ?', talker: 'barry'},\n\
+                {text: 'Sorry sir, but I have to work', talker: 'pizzaiolo'},\n\
+                {text: 'Take my business card', talker: 'pizzaiolo'},\n\
+                {text: 'I wrote the list for you', talker: 'pizzaiolo'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('pizzaiolo:talk:4', true);\n\
+                board.addItem({item: items['pizzaiolo-business-card']});\n\
+            }\n\
+        });\n\
+    } else {\n\
+         board.talk({sentences: [\n\
+            {text: 'Hi', talker: 'barry'},\n\
+            {text: 'Sorry sir I have no time to talk', talker: 'pizzaiolo'}\n\
+        ]});\n\
+    }\n\
+};\n\
+\n\
+module.exports = Pizzaiolo;//@ sourceURL=pizzeria/pizzaiolo.js"
 ));
 require.register("bakery/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
@@ -2233,7 +2394,7 @@ Board.prototype.updateInventory = function () {\n\
         this.inventory.removeChild(this.inventory.firstChild);\n\
     }\n\
 \n\
-    items.forEach(function (item) {\n\
+    items.reverse().forEach(function (item) {\n\
         var el = document.createElement('div');\n\
         el.setAttribute('class', 'item');\n\
         el.appendChild(document.createTextNode(item.name));\n\
@@ -3817,6 +3978,7 @@ require.alias("component-clone/index.js", "board/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("pizzeria/index.js", "boot/deps/pizzeria/index.js");
+require.alias("pizzeria/pizzaiolo.js", "boot/deps/pizzeria/pizzaiolo.js");
 require.alias("gameponent-canvas/index.js", "pizzeria/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "pizzeria/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "pizzeria/deps/canvas/lib/layer.js");
@@ -3852,6 +4014,9 @@ require.alias("gameponent-loop/lib/modestack.js", "pizzeria/deps/loop/lib/modest
 require.alias("gameponent-loop/lib/eventhandler.js", "pizzeria/deps/loop/lib/eventhandler.js");
 require.alias("gameponent-loop/index.js", "pizzeria/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "pizzeria/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
 require.alias("barry/index.js", "pizzeria/deps/barry/index.js");
 require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "barry/deps/canvas/lib/canvas.js");
@@ -4055,6 +4220,51 @@ require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventh
 require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
 require.alias("component-clone/index.js", "board/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "pizzeria/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("bakery/index.js", "boot/deps/bakery/index.js");

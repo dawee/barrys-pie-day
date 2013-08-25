@@ -73,6 +73,21 @@
             {
               "y": 0, 
               "x": 0, 
+              "height": 32, 
+              "name": "pizzaiolo_stand_0", 
+              "width": 31
+            }
+          ], 
+          "name": "pizzaiolo_stand"
+        }, 
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 32, 
+              "x": 0, 
               "height": 61, 
               "name": "judge_woman_sit_0", 
               "width": 34
@@ -86,7 +101,7 @@
           }, 
           "tiles": [
             {
-              "y": 61, 
+              "y": 93, 
               "x": 0, 
               "height": 25, 
               "name": "judge_glass_sit_0", 
@@ -101,7 +116,7 @@
           }, 
           "tiles": [
             {
-              "y": 86, 
+              "y": 118, 
               "x": 0, 
               "height": 28, 
               "name": "judge_young_sit_0", 

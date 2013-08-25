@@ -1,12 +1,13 @@
 {
   "name": "pizzeria",
-  "scripts": ["index.js"],
+  "scripts": ["index.js", "pizzaiolo.js"],
   "dependencies": {
     "gameponent/canvas": "*",
     "gameponent/tile": "*",
     "gameponent/sprite": "*",
-    "gameponent/loop": "*"
+    "gameponent/loop": "*",
+    "component/clone": "*"
   },
-  "local": ["barry", "map", "board"]
+  "local": ["barry", "map", "board", "area"]
 
 }
