@@ -1207,7 +1207,11 @@ Stadium.prototype.init = function (options) {\n\
         click: function () {\n\
             this.x = this.left;\n\
             board.setSubject(town);\n\
-            board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges', talker: 'barry'});\n\
+            if (board.is(['judge-woman:talk:first', 'judge-glass:talk:first', 'judge-young:talk:first'])) {\n\
+                loop.setMode({mode: map});\n\
+            } else {\n\
+                board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges', talker: 'barry'});\n\
+            }\n\
         },\n\
         go: function () {}\n\
     });\n\
@@ -1303,20 +1307,34 @@ JudgeWoman.prototype.watch = function () {\n\
 };\n\
 \n\
 JudgeWoman.prototype.talk = function () {\n\
-    board.talk({sentences: [\n\
-        {text: 'Hi', talker: 'barry'},\n\
-        {text: 'Hello darling !', talker: 'judge-woman'},\n\
-        {text: 'I want to be the only second of the competition', talker: 'barry'},\n\
-        {text: 'Sure my dear, and why would I do that for you ?', talker: 'judge-woman'},\n\
-        {text: 'Because I was faster than the other 9 dudes', talker: 'barry'},\n\
-        {text: 'I\\'m affraid I don\\'t care sweet heart', talker: 'judge-woman'},\n\
-        {text: '...', talker: 'judge-woman'},\n\
-        {text: 'Give me your phone number darling', talker: 'judge-woman'},\n\
-        {text: 'Wh... What ??', talker: 'barry'},\n\
-        {text: 'Give me your phone number and I\\'ll do anything you want', talker: 'judge-woman'},\n\
-        {text: '*wink*', talker: 'judge-woman'},\n\
-        {text: 'brrrrrrrrrr', talker: 'barry'},\n\
-    ]});\n\
+    if (!board.is('judge-woman:talk:first')) {\n\
+        board.talk({sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello darling !', talker: 'judge-woman'},\n\
+                {text: 'I want to be the only second of the competition', talker: 'barry'},\n\
+                {text: 'Sure my dear, and why would I do that for you ?', talker: 'judge-woman'},\n\
+                {text: 'Because I was faster than the other 9 dudes', talker: 'barry'},\n\
+                {text: 'I\\'m affraid I don\\'t care sweet heart', talker: 'judge-woman'},\n\
+                {text: '...', talker: 'judge-woman'},\n\
+                {text: 'Give me your phone number darling', talker: 'judge-woman'},\n\
+                {text: 'Wh... What ??', talker: 'barry'},\n\
+                {text: 'Give me your phone number and I\\'ll do anything you want', talker: 'judge-woman'},\n\
+                {text: '*wink*', talker: 'judge-woman'},\n\
+                {text: 'brrrrrrrrrr', talker: 'barry'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('judge-woman:talk:first', true);\n\
+            }\n\
+        });\n\
+    } else {\n\
+        board.talk({sentences: [\n\
+            {text: 'Hi', talker: 'barry'},\n\
+            {text: 'Hello darling !', talker: 'judge-woman'},\n\
+            {text: 'Do you have a phone number for me ?', talker: 'judge-woman'},\n\
+            {text: 'No', talker: 'barry'},\n\
+            {text: 'Well, Good bye darling !', talker: 'judge-woman'}\n\
+        ]});\n\
+    }\n\
 };\n\
 \n\
 \n\
@@ -1899,6 +1917,12 @@ module.exports = new ClockRepair();//@ sourceURL=clock-repair/index.js"
 ));
 require.register("board/index.js", Function("exports, require, module",
 "var VerbsDesk = require('./verbsdesk');\n\
+var switches = {};\n\
+var speechDuration = 500;\n\
+\n\
+window.setSpeechDuration = function (duration) {\n\
+    speechDuration = duration;\n\
+};\n\
 \n\
 function Board() {\n\
     this.el = document.createElement('div');\n\
@@ -1915,7 +1939,7 @@ Board.prototype.notify = function (options) {\n\
     var callback = options.callback || function () {};\n\
     var dialogText = this.dialogText;\n\
     var talker = options.talker || '';\n\
-    var delay = (options.text.split(' ').length) * 500;\n\
+    var delay = (options.text.split(' ').length) * speechDuration;\n\
     delay = delay < 2000 ? 2000 : delay;\n\
     this.dialog.setAttribute('class', 'dialog ' + talker);\n\
     dialogText.data = options.text;\n\
@@ -1924,6 +1948,23 @@ Board.prototype.notify = function (options) {\n\
         callback();\n\
     }, delay);\n\
 };\n\
+\n\
+Board.prototype.set = function (name, value) {\n\
+    switches[name] = value;\n\
+};\n\
+\n\
+Board.prototype.is = function (names) {\n\
+    names = (typeof names === 'string') ? [names] : names;\n\
+    var result = true;\n\
+    names.forEach(function (name) {\n\
+        if (!switches[name]) {\n\
+            result = false;\n\
+        }\n\
+    });\n\
+\n\
+    return result;\n\
+};\n\
+\n\
 \n\
 Board.prototype.talk = function (options) {\n\
     this.hide();\n\
