@@ -1,6 +1,6 @@
 {
   "name": "board",
-  "scripts": ["index.js", "verbsdesk.js"],
+  "scripts": ["index.js", "verbsdesk.js", "combination.js"],
   "dependencies": {
     "gameponent/canvas": "*",
     "gameponent/tile": "*",

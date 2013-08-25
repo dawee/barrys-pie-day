@@ -1938,6 +1938,7 @@ Bakery.prototype.init = function (options) {\n\
     });\n\
     ventilation.x = ventilation.left + ventilation.width / 2;\n\
     ventilation.name = 'VENTILATION';\n\
+    ventilation.id = 'ventilation';\n\
     ventilation.look = function () {\n\
         board.notify({text: 'It\\'s warm and it smells good bread', talker: 'barry'});\n\
     };\n\
@@ -2003,10 +2004,6 @@ var items = {\n\
     'dry-pen': {\n\
         id: 'dry-pen',\n\
         name: 'Dry Ball Pen'\n\
-    },\n\
-    pen: {\n\
-        id: 'pen',\n\
-        name: 'Pen'\n\
     }\n\
 };\n\
 \n\
@@ -2137,6 +2134,7 @@ var switches = {};\n\
 var speechDuration = 500;\n\
 var defaultDuration = 2000;\n\
 var items = [];\n\
+var Combination = require('./combination');\n\
 \n\
 window.setSpeechDuration = function (duration) {\n\
     speechDuration = duration;\n\
@@ -2154,6 +2152,7 @@ function Board() {\n\
     this.inventory = document.createElement('div');\n\
     this.inventory.setAttribute('class', 'inventory');\n\
     this.verbsDesk = new VerbsDesk({board: this});\n\
+    this.combination = new Combination({board: this});\n\
     this.verb = null;\n\
     this.subject = null;\n\
     this.mode = null;\n\
@@ -2198,7 +2197,8 @@ Board.prototype.removeItem = function (options) {\n\
     var index = 0;\n\
 \n\
     items.forEach(function (item) {\n\
-        if (item.id === options.id) {\n\
+        if (item.id === options.item.id) {\n\
+            console.log(slot);\n\
             slot = index;\n\
         }\n\
         index++;\n\
@@ -2228,10 +2228,9 @@ Board.prototype.is = function (names) {\n\
 };\n\
 \n\
 Board.prototype.updateInventory = function () {\n\
-    var index = 0;\n\
-    for (index = 0; index < this.inventory.childNodes.length; index++) {\n\
-        el = this.inventory.childNodes[index];\n\
-        this.inventory.removeChild(el);\n\
+    \n\
+    while (this.inventory.hasChildNodes()) {\n\
+        this.inventory.removeChild(this.inventory.firstChild);\n\
     }\n\
 \n\
     items.forEach(function (item) {\n\
@@ -2276,7 +2275,8 @@ Board.prototype.selectItem = function (options) {\n\
 \n\
     if (this.handled === null && typeof this.verb.name === 'function') {\n\
         this.handled = item;\n\
-        this.setVerb({verb: this.verb})\n\
+        var verbName = typeof this.verb.name === 'function' ? this.verb.name() : this.verb.name;\n\
+        this.setStatus({status: verbName});\n\
     } else {\n\
         this.setSubject(item);\n\
         this.activate();\n\
@@ -2315,7 +2315,7 @@ Board.prototype.setStatus = function (options) {\n\
 Board.prototype.setVerb = function (options) {\n\
     this.verb = options.verb;\n\
     var verbName = typeof this.verb.name === 'function' ? this.verb.name() : this.verb.name;\n\
-\n\
+    this.handled = null;\n\
     this.setStatus({status: verbName});\n\
 };\n\
 \n\
@@ -2403,7 +2403,10 @@ var verbs = {\n\
         },\n\
 \n\
         activate: function (options) {\n\
-\n\
+            board.combination.tryUseCombination({\n\
+                handled: board.handled,\n\
+                subject: board.subject\n\
+            });\n\
         }\n\
     },\n\
 \n\
@@ -2483,6 +2486,48 @@ VerbsDesk.prototype.render = function () {\n\
 };\n\
 \n\
 module.exports = VerbsDesk;//@ sourceURL=board/verbsdesk.js"
+));
+require.register("board/combination.js", Function("exports, require, module",
+"var board;\n\
+var useCombinations = []\n\
+\n\
+var items = {\n\
+    pen: {\n\
+        id: 'pen',\n\
+        name: 'Pen'\n\
+    }\n\
+}\n\
+\n\
+\n\
+function _areSubjectsHere(subject1, subject2, requirements) {\n\
+    return requirements.indexOf(subject1.id) >= 0 && requirements.indexOf(subject2.id) >= 0;\n\
+};\n\
+\n\
+useCombinations.push({\n\
+\n\
+    combine: function (options) {\n\
+        var handled = options.handled;\n\
+        var subject = options.subject;\n\
+        if (_areSubjectsHere(handled, subject, ['dry-pen', 'ventilation'])) {\n\
+            board.removeItem({item: handled});\n\
+            board.addItem({item: items.pen});\n\
+            board.notify({text: 'Cool, the steam seems to wet the pen'});\n\
+        }\n\
+    }\n\
+\n\
+});\n\
+\n\
+function Combination(options) {\n\
+    board = options.board;\n\
+}\n\
+\n\
+Combination.prototype.tryUseCombination = function (options) {\n\
+    useCombinations.forEach(function (combination) {\n\
+        combination.combine(options);\n\
+    });\n\
+};\n\
+\n\
+module.exports = Combination;//@ sourceURL=board/combination.js"
 ));
 require.register("boot/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
@@ -2798,6 +2843,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -2838,6 +2884,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "stadium/deps/board/index.js");
 require.alias("board/verbsdesk.js", "stadium/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "stadium/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3007,6 +3054,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3206,6 +3254,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3246,6 +3295,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "photograph/deps/board/index.js");
 require.alias("board/verbsdesk.js", "photograph/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "photograph/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3445,6 +3495,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3485,6 +3536,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "lake/deps/board/index.js");
 require.alias("board/verbsdesk.js", "lake/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "lake/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3684,6 +3736,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3724,6 +3777,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "theater/deps/board/index.js");
 require.alias("board/verbsdesk.js", "theater/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "theater/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3923,6 +3977,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -3963,6 +4018,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "pizzeria/deps/board/index.js");
 require.alias("board/verbsdesk.js", "pizzeria/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "pizzeria/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -4166,6 +4222,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -4206,6 +4263,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "bakery/deps/board/index.js");
 require.alias("board/verbsdesk.js", "bakery/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "bakery/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -4450,6 +4508,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "map/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -4490,6 +4549,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "clock-repair/deps/board/index.js");
 require.alias("board/verbsdesk.js", "clock-repair/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "clock-repair/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
@@ -4530,6 +4590,7 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "boot/deps/board/index.js");
 require.alias("board/verbsdesk.js", "boot/deps/board/verbsdesk.js");
+require.alias("board/combination.js", "boot/deps/board/combination.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
