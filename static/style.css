@@ -62,3 +62,18 @@ body {
     width: 33%;
     height: 40px;
 }
+
+.inventory {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 40px;
+}
+
+.inventory .item {
+    display: inline-block;
+    width: 49%;
+    margin: 0;
+    text-align: left;
+    height: 40px;
+}

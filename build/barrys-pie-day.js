@@ -1887,6 +1887,9 @@ var Barry = require('barry');\n\
 var loop = require('loop');\n\
 var map = require('map');\n\
 var board = require('board');\n\
+var Area = require('area');\n\
+var Bin = require('./bin');\n\
+\n\
 \n\
 function Bakery() {\n\
     this.root = new canvas.LayerGroup();\n\
@@ -1908,8 +1911,28 @@ Bakery.prototype.init = function (options) {\n\
         x: 250,\n\
         y: 70\n\
     });\n\
-\n\
     this.layer.addView({view: this.barry});\n\
+\n\
+    var town = Area.define({\n\
+        left: this.screen.viewport.width * 7.0 / 8,\n\
+        top: this.screen.viewport.height,\n\
+        width: this.screen.viewport.width,\n\
+        height: this.screen.viewport.height,\n\
+        hover: function () {\n\
+            board.setSubject(town);\n\
+        },\n\
+        click: function () {\n\
+            loop.setMode({mode: map});\n\
+        },\n\
+        go: function () {}\n\
+    });\n\
+\n\
+    this.bin = new Bin({screen: this.screen, tilesets: this.tilesets, x: 43, y: 82});\n\
+    this.layer.addView({view: this.bin});\n\
+\n\
+    this.areas = new Area({screen: this.screen, areas: [\n\
+        town, this.bin\n\
+    ]});\n\
     return this;\n\
 };\n\
 \n\
@@ -1923,18 +1946,24 @@ Bakery.prototype.onMouseDown = function (event) {\n\
     var that = this;\n\
 \n\
     board.setSubject(event);\n\
-    \n\
+\n\
     options.callback = function () {\n\
         if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
             loop.setMode({mode: map});\n\
         }\n\
 \n\
     };\n\
-\n\
+    this.areas.onMouseDown(event);\n\
     board.activate();\n\
 };\n\
 \n\
+Bakery.prototype.onMouseMove = function (event) {\n\
+    board.setSubject(event);\n\
+    this.areas.onMouseMove(event);\n\
+};\n\
+\n\
 Bakery.prototype.update = function () {\n\
+    this.bin.step();\n\
     this.barry.step();\n\
 };\n\
 \n\
@@ -1944,6 +1973,95 @@ Bakery.prototype.draw = function () {\n\
 \n\
 \n\
 module.exports = new Bakery();//@ sourceURL=bakery/index.js"
+));
+require.register("bakery/bin.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+var Area = require('area');\n\
+var board = require('board');\n\
+\n\
+var items = {\n\
+    doll: {\n\
+        id: 'doll',\n\
+        name: 'Barbie Doll'\n\
+    },\n\
+    'dry-pen': {\n\
+        id: 'dry-pen',\n\
+        name: 'Dry Ball Pen'  \n\
+    },\n\
+};\n\
+\n\
+\n\
+function Bin(options) {\n\
+    this.name = \"PUBLIC BIN\";\n\
+\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.decoration;\n\
+    options.animation = 'bin_flies';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+    this.left = this.x - this.width / 2;\n\
+    this.top = this.y + this.height / 2;\n\
+    this.width = this.image.width;\n\
+    this.height = this.image.height;    \n\
+}\n\
+\n\
+Bin.prototype = clone(sprite.Sprite.prototype);\n\
+Bin.prototype.contains = Area.Rect.prototype.contains;\n\
+\n\
+Bin.prototype.hover = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+Bin.prototype.click = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+Bin.prototype.look = function() {\n\
+    if (!board.is('bin:look')) {\n\
+        board.talk({\n\
+            sentences: [\n\
+                {text: 'I have to say', talker: 'barry'},\n\
+                {text: 'I never do that', talker: 'barry'},\n\
+                {text: 'NEVER', talker: 'barry'},\n\
+                {text: 'But ... in my situation', talker: 'barry'},\n\
+                {text: '...', talker: 'barry'},\n\
+                {text: 'erk erk erk', talker: 'barry'},\n\
+                {text: 'Oh my ... oh crap', talker: 'barry'},\n\
+                {text: 'Something is moving in there ?', talker: 'barry'},\n\
+                {text: '...', talker: 'barry'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+                board.addItem({item: items.doll});\n\
+                board.addItem({item: items['dry-pen']});\n\
+\n\
+\n\
+                board.notify({text: '2 OBJECTS FOUND'});\n\
+                board.set('bin:look', true);\n\
+            }\n\
+        });\n\
+    } else {\n\
+        board.notify({text: 'Enough of that for me today, thanks.', talker: 'barry'});\n\
+\n\
+    }\n\
+};\n\
+\n\
+module.exports = Bin;//@ sourceURL=bakery/bin.js"
 ));
 require.register("clock-repair/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
@@ -2014,9 +2132,15 @@ require.register("board/index.js", Function("exports, require, module",
 "var VerbsDesk = require('./verbsdesk');\n\
 var switches = {};\n\
 var speechDuration = 500;\n\
+var defaultDuration = 500;\n\
+var items = [];\n\
 \n\
 window.setSpeechDuration = function (duration) {\n\
     speechDuration = duration;\n\
+};\n\
+\n\
+window.setDefaultDuration = function (duration) {\n\
+    defaultDuration = duration;\n\
 };\n\
 \n\
 function Board() {\n\
@@ -2024,10 +2148,13 @@ function Board() {\n\
     this.el.setAttribute('class', 'board');\n\
     this.dialog = document.createElement('div');\n\
     this.dialog.setAttribute('class', 'dialog');\n\
+    this.inventory = document.createElement('div');\n\
+    this.inventory.setAttribute('class', 'inventory');\n\
     this.verbsDesk = new VerbsDesk({board: this});\n\
     this.verb = null;\n\
     this.subject = null;\n\
     this.mode = null;\n\
+    this.inventorySlot = 0;\n\
 }\n\
 \n\
 Board.prototype.notify = function (options) {\n\
@@ -2035,13 +2162,48 @@ Board.prototype.notify = function (options) {\n\
     var dialogText = this.dialogText;\n\
     var talker = options.talker || '';\n\
     var delay = (options.text.split(' ').length) * speechDuration;\n\
-    delay = delay < 2000 ? 2000 : delay;\n\
+    delay = delay < defaultDuration ? defaultDuration : delay;\n\
     this.dialog.setAttribute('class', 'dialog ' + talker);\n\
     dialogText.data = options.text;\n\
     this.notifyId = setTimeout(function () {\n\
         dialogText.data = '';\n\
         callback();\n\
     }, delay);\n\
+};\n\
+\n\
+Board.prototype.addItem = function (options) {\n\
+    items.push(options.item);\n\
+    this.updateInventory();\n\
+};\n\
+\n\
+Board.prototype.getItem = function (options) {\n\
+    var result = null;\n\
+    \n\
+    items.forEach(function (item) {\n\
+        if (item.id === options.id) {\n\
+            result = item;\n\
+        }\n\
+    });\n\
+\n\
+    return result;\n\
+};\n\
+\n\
+Board.prototype.removeItem = function (options) {\n\
+    var slot = -1;\n\
+    var index = 0;\n\
+\n\
+    items.forEach(function (item) {\n\
+        if (item.id === options.id) {\n\
+            slot = index;\n\
+        }\n\
+        index++;\n\
+    });\n\
+\n\
+    if (slot >= 0) {\n\
+        items.splice(slot, 1);\n\
+    }\n\
+\n\
+    this.updateInventory();\n\
 };\n\
 \n\
 Board.prototype.set = function (name, value) {\n\
@@ -2060,6 +2222,23 @@ Board.prototype.is = function (names) {\n\
     return result;\n\
 };\n\
 \n\
+Board.prototype.updateInventory = function () {\n\
+    var index = 0;\n\
+    for (index = 0; index < this.inventory.childNodes.length; index++) {\n\
+        el = this.inventory.childNodes[index];\n\
+        this.inventory.removeChild(el);\n\
+    }\n\
+\n\
+    items.forEach(function (item) {\n\
+        var el = document.createElement('div');\n\
+        el.setAttribute('class', 'item');\n\
+        el.appendChild(document.createTextNode(item.name));\n\
+        if (typeof item.select === 'function') {\n\
+            el.addEventListener('click', item.select);\n\
+        }\n\
+        this.inventory.appendChild(el);\n\
+    }, this);\n\
+};\n\
 \n\
 Board.prototype.talk = function (options) {\n\
     this.hide();\n\
@@ -2151,6 +2330,7 @@ Board.prototype.render = function () {\n\
     this.dialog.appendChild(this.dialogText);\n\
     this.el.appendChild(this.statusLine);\n\
     this.el.appendChild(this.verbsDesk.render().el);\n\
+    this.el.appendChild(this.inventory);\n\
     return this;    \n\
 };\n\
 \n\
@@ -2213,7 +2393,13 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         name: 'LOOK AT',\n\
 \n\
         activate: function (options) {\n\
-\n\
+            var subject = options.board.subject;\n\
+            options.callback = function () {\n\
+                if (typeof subject.look === 'function') {\n\
+                    subject.look(options);\n\
+                }\n\
+            };\n\
+            verbs.go.activate(options);\n\
         }\n\
     },\n\
 \n\
@@ -3779,6 +3965,7 @@ require.alias("component-clone/index.js", "board/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("bakery/index.js", "boot/deps/bakery/index.js");
+require.alias("bakery/bin.js", "boot/deps/bakery/bin.js");
 require.alias("gameponent-canvas/index.js", "bakery/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "bakery/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "bakery/deps/canvas/lib/layer.js");
@@ -3814,6 +4001,9 @@ require.alias("gameponent-loop/lib/modestack.js", "bakery/deps/loop/lib/modestac
 require.alias("gameponent-loop/lib/eventhandler.js", "bakery/deps/loop/lib/eventhandler.js");
 require.alias("gameponent-loop/index.js", "bakery/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "bakery/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
 require.alias("barry/index.js", "bakery/deps/barry/index.js");
 require.alias("gameponent-canvas/index.js", "barry/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "barry/deps/canvas/lib/canvas.js");
@@ -4015,6 +4205,51 @@ require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventh
 require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
 require.alias("component-clone/index.js", "board/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "bakery/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("clock-repair/index.js", "boot/deps/clock-repair/index.js");

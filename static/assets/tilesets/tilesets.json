@@ -1,6 +1,68 @@
 {
   "tilesets": [
     {
+      "name": "decoration", 
+      "groups": [
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 0, 
+              "x": 0, 
+              "height": 101, 
+              "name": "bin_flies_0", 
+              "width": 33
+            }, 
+            {
+              "y": 0, 
+              "x": 33, 
+              "height": 101, 
+              "name": "bin_flies_1", 
+              "width": 33
+            }, 
+            {
+              "y": 101, 
+              "x": 0, 
+              "height": 101, 
+              "name": "bin_flies_2", 
+              "width": 33
+            }, 
+            {
+              "y": 101, 
+              "x": 33, 
+              "height": 101, 
+              "name": "bin_flies_3", 
+              "width": 33
+            }, 
+            {
+              "y": 202, 
+              "x": 0, 
+              "height": 101, 
+              "name": "bin_flies_4", 
+              "width": 33
+            }, 
+            {
+              "y": 202, 
+              "x": 33, 
+              "height": 101, 
+              "name": "bin_flies_5", 
+              "width": 33
+            }, 
+            {
+              "y": 303, 
+              "x": 0, 
+              "height": 101, 
+              "name": "bin_flies_6", 
+              "width": 33
+            }
+          ], 
+          "name": "bin_flies"
+        }
+      ]
+    }, 
+    {
       "name": "judges", 
       "groups": [
         {
