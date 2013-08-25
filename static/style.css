@@ -15,15 +15,24 @@ body {
     margin-right: auto;
 }
 
-#game canvas {
+#game .dialog {
     position: absolute;
     top: 0;
+    left: 0;
+    height: 45px;
+    width: 100%;
+    text-align: center;
+}
+
+#game canvas {
+    position: absolute;
+    top: 45px;
     left: 0;
 }
 
 #game .board {
     position: absolute;
-    top: 384px;
+    top: 429px;
     left: 0;
     bottom: 0;
     right: 0;
@@ -37,7 +46,8 @@ body {
 }
 
 .verbs-desk {
-    width: 100%
+    width: 100%;
+    overflow: hidden;
 }
 
 .verbs-desk .verb {

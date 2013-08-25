@@ -914,7 +914,7 @@ function _walk(barry) {\n\
     if (reached === true) {\n\
         barry.target = null;\n\
         barry.loop({animation: 'stand'});\n\
-        barry.callback();\n\
+        barry.walkCallback();\n\
     }\n\
 }\n\
 \n\
@@ -922,9 +922,13 @@ Barry.prototype.walkTo = function (options) {\n\
     var x = options.offsetX === undefined ? options.layerX : options.offsetX;\n\
     var target = (x * this.screen.viewport.width) / this.screen.width;\n\
 \n\
+    if (!!options.name) {\n\
+        var target = options.x;\n\
+    }\n\
+\n\
     if (target !== this.x) {\n\
         this.target = target;\n\
-        this.callback = options.callback || function () {};\n\
+        this.walkCallback = options.walkCallback || function () {};\n\
         this.direction = (this.target > this.x) ? 1 : -1;\n\
 \n\
         if (this.target > this.x) {\n\
@@ -933,6 +937,12 @@ Barry.prototype.walkTo = function (options) {\n\
             this.loop({animation: 'walk_left'});\n\
         }\n\
     }\n\
+    if (!!options.name) {\n\
+        var length = Math.abs(options.x - this.x);\n\
+        length -= options.width;\n\
+        this.target = this.x + this.direction * length\n\
+    }\n\
+\n\
 };\n\
 \n\
 Barry.prototype.step = function () {\n\
@@ -941,132 +951,6 @@ Barry.prototype.step = function () {\n\
 }\n\
 \n\
 module.exports = Barry;//@ sourceURL=barry/index.js"
-));
-require.register("stadium/index.js", Function("exports, require, module",
-"var canvas = require('canvas');\n\
-var sprite = require('sprite');\n\
-var Barry = require('barry');\n\
-var loop = require('loop');\n\
-var map = require('map');\n\
-var board = require('board');\n\
-var JudgeWoman = require('./judgewoman');\n\
-var JudgeGlass = require('./judgeglass');\n\
-var JudgeYoung = require('./judgeyoung');\n\
-\n\
-function Stadium() {\n\
-    this.root = new canvas.LayerGroup();\n\
-    this.layer = new canvas.Layer();\n\
-    this.root.addLayer({layer: this.layer});\n\
-}\n\
-\n\
-Stadium.prototype.init = function (options) {\n\
-    this.screen = options.screen;\n\
-    this.tilesets = options.tilesets;\n\
-    this.layer.addView({view: new canvas.ImageView({\n\
-        image: this.tilesets.bg_b.groups.stadium.tile(),\n\
-        x: 160,\n\
-        y: 64\n\
-    })});\n\
-    this.barry = new Barry({screen: this.screen, tilesets: this.tilesets, x: 150, y: 50});\n\
-    this.judgeYoung = new JudgeYoung({screen: this.screen, tilesets: this.tilesets, x: 49, y: 100});\n\
-    this.judgeGlass = new JudgeGlass({screen: this.screen, tilesets: this.tilesets, x: 40, y: 88});\n\
-    this.judgeWoman = new JudgeWoman({screen: this.screen, tilesets: this.tilesets, x: 28, y: 66});\n\
-    this.layer.addView({view: this.barry});\n\
-\n\
-    this.layer.addView({view: this.judgeYoung});\n\
-    this.layer.addView({view: this.judgeGlass});\n\
-    this.layer.addView({view: this.judgeWoman});\n\
-    return this;\n\
-};\n\
-\n\
-Stadium.prototype.reset = function() {\n\
-    this.screen.root = this.root;\n\
-    board.reset({mode: this});\n\
-};\n\
-\n\
-Stadium.prototype.onMouseDown = function (event) {\n\
-    var options = event;\n\
-    var that = this;\n\
-\n\
-    board.setSubject(event);\n\
-\n\
-    options.callback = function () {\n\
-        if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
-            loop.setMode({mode: map});\n\
-        }\n\
-\n\
-    };\n\
-    \n\
-    board.activate();\n\
-};\n\
-\n\
-Stadium.prototype.update = function () {\n\
-    this.barry.step();\n\
-    this.judgeWoman.step();\n\
-    this.judgeGlass.step();\n\
-    this.judgeYoung.step();\n\
-};\n\
-\n\
-Stadium.prototype.draw = function () {\n\
-    this.screen.draw();\n\
-};\n\
-\n\
-\n\
-module.exports = new Stadium();//@ sourceURL=stadium/index.js"
-));
-require.register("stadium/judgewoman.js", Function("exports, require, module",
-"var sprite = require('sprite');\n\
-var clone = require('clone');\n\
-\n\
-function JudgeWoman(options) {\n\
-    this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
-    options.animation = 'judge_woman_sit';\n\
-    this.target = null;\n\
-    this.direction = null;\n\
-\n\
-    sprite.Sprite.apply(this, [options]);\n\
-}\n\
-\n\
-JudgeWoman.prototype = clone(sprite.Sprite.prototype);\n\
-\n\
-module.exports = JudgeWoman;//@ sourceURL=stadium/judgewoman.js"
-));
-require.register("stadium/judgeglass.js", Function("exports, require, module",
-"var sprite = require('sprite');\n\
-var clone = require('clone');\n\
-\n\
-function JudgeGlass(options) {\n\
-    this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
-    options.animation = 'judge_glass_sit';\n\
-    this.target = null;\n\
-    this.direction = null;\n\
-\n\
-    sprite.Sprite.apply(this, [options]);\n\
-}\n\
-\n\
-JudgeGlass.prototype = clone(sprite.Sprite.prototype);\n\
-\n\
-module.exports = JudgeGlass;//@ sourceURL=stadium/judgeglass.js"
-));
-require.register("stadium/judgeyoung.js", Function("exports, require, module",
-"var sprite = require('sprite');\n\
-var clone = require('clone');\n\
-\n\
-function JudgeYoung(options) {\n\
-    this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
-    options.animation = 'judge_young_sit';\n\
-    this.target = null;\n\
-    this.direction = null;\n\
-\n\
-    sprite.Sprite.apply(this, [options]);\n\
-}\n\
-\n\
-JudgeYoung.prototype = clone(sprite.Sprite.prototype);\n\
-\n\
-module.exports = JudgeYoung;//@ sourceURL=stadium/judgeyoung.js"
 ));
 require.register("gameponent-geom/index.js", Function("exports, require, module",
 "exports.Vector = require('./lib/vector');\n\
@@ -1229,6 +1113,8 @@ module.exports = Rect;//@ sourceURL=gameponent-geom/lib/rect.js"
 require.register("area/index.js", Function("exports, require, module",
 "var geom = require('geom');\n\
 \n\
+Area.Rect = geom.Rect;\n\
+\n\
 function Area(options) {\n\
     this.screen = options.screen;\n\
     this.areas = options.areas || [];\n\
@@ -1272,6 +1158,184 @@ Area.define = function (options) {\n\
 };\n\
 \n\
 module.exports = Area;//@ sourceURL=area/index.js"
+));
+require.register("stadium/index.js", Function("exports, require, module",
+"var canvas = require('canvas');\n\
+var sprite = require('sprite');\n\
+var Barry = require('barry');\n\
+var loop = require('loop');\n\
+var map = require('map');\n\
+var board = require('board');\n\
+var JudgeWoman = require('./judgewoman');\n\
+var JudgeGlass = require('./judgeglass');\n\
+var JudgeYoung = require('./judgeyoung');\n\
+var Area = require('area');\n\
+\n\
+function Stadium() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
+\n\
+Stadium.prototype.init = function (options) {\n\
+    this.screen = options.screen;\n\
+    this.tilesets = options.tilesets;\n\
+    this.layer.addView({view: new canvas.ImageView({\n\
+        image: this.tilesets.bg_b.groups.stadium.tile(),\n\
+        x: 160,\n\
+        y: 64\n\
+    })});\n\
+    this.barry = new Barry({screen: this.screen, tilesets: this.tilesets, x: 150, y: 50});\n\
+    this.judgeYoung = new JudgeYoung({screen: this.screen, tilesets: this.tilesets, x: 49, y: 100});\n\
+    this.judgeGlass = new JudgeGlass({screen: this.screen, tilesets: this.tilesets, x: 40, y: 88});\n\
+    this.judgeWoman = new JudgeWoman({screen: this.screen, tilesets: this.tilesets, x: 28, y: 66});\n\
+\n\
+    this.layer.addView({view: this.judgeYoung});\n\
+    this.layer.addView({view: this.judgeGlass});\n\
+    this.layer.addView({view: this.judgeWoman});\n\
+\n\
+    this.layer.addView({view: this.barry});\n\
+\n\
+    var town = Area.define({\n\
+        left: this.screen.viewport.width * 7.0 / 8,\n\
+        top: this.screen.viewport.height,\n\
+        width: this.screen.viewport.width,\n\
+        height: this.screen.viewport.height,\n\
+        hover: function () {\n\
+            board.setSubject(town);\n\
+        },\n\
+        click: function () {\n\
+            this.x = this.left;\n\
+            board.setSubject(town);\n\
+            board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges'});\n\
+        },\n\
+        go: function () {}\n\
+    });\n\
+    town.name = 'TOWN';\n\
+\n\
+    this.areas = new Area({screen: this.screen, areas: [\n\
+        this.judgeWoman,\n\
+        town\n\
+    ]});\n\
+    return this;\n\
+};\n\
+\n\
+Stadium.prototype.reset = function() {\n\
+    this.screen.root = this.root;\n\
+    board.reset({mode: this});\n\
+};\n\
+\n\
+Stadium.prototype.onMouseDown = function (event) {\n\
+    var options = event;\n\
+    var that = this;\n\
+\n\
+    board.setSubject(event);\n\
+\n\
+    options.callback = function () {\n\
+        if (that.barry.x > that.screen.viewport.width * 7.0 / 8) {\n\
+            loop.setMode({mode: map});\n\
+        }\n\
+\n\
+    };\n\
+    this.areas.onMouseDown(event);\n\
+    board.activate();\n\
+};\n\
+\n\
+Stadium.prototype.onMouseMove = function (event) {\n\
+    board.setSubject(event);\n\
+    this.areas.onMouseMove(event);\n\
+};\n\
+\n\
+Stadium.prototype.update = function () {\n\
+    this.barry.step();\n\
+    this.judgeWoman.step();\n\
+    this.judgeGlass.step();\n\
+    this.judgeYoung.step();\n\
+};\n\
+\n\
+Stadium.prototype.draw = function () {\n\
+    this.screen.draw();\n\
+};\n\
+\n\
+\n\
+module.exports = new Stadium();//@ sourceURL=stadium/index.js"
+));
+require.register("stadium/judgewoman.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+var Area = require('area');\n\
+var board = require('board');\n\
+\n\
+function JudgeWoman(options) {\n\
+    this.name = \"JUDGE WOMAN\";\n\
+\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_woman_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+    this.left = this.x - this.width / 2;\n\
+    this.top = this.y + this.height / 2;\n\
+    this.width = this.image.width;\n\
+    this.height = this.image.height;\n\
+}\n\
+\n\
+JudgeWoman.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+JudgeWoman.prototype.contains = Area.Rect.prototype.contains;\n\
+\n\
+JudgeWoman.prototype.hover = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeWoman.prototype.click = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeWoman.prototype.take = function () {\n\
+    board.notify({text: 'She\\'s not my type'});\n\
+};\n\
+\n\
+\n\
+module.exports = JudgeWoman;//@ sourceURL=stadium/judgewoman.js"
+));
+require.register("stadium/judgeglass.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+\n\
+function JudgeGlass(options) {\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_glass_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+}\n\
+\n\
+JudgeGlass.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+module.exports = JudgeGlass;//@ sourceURL=stadium/judgeglass.js"
+));
+require.register("stadium/judgeyoung.js", Function("exports, require, module",
+"var sprite = require('sprite');\n\
+var clone = require('clone');\n\
+\n\
+function JudgeYoung(options) {\n\
+    this.screen = options.screen;\n\
+    options.tileset = options.tilesets.judges;\n\
+    options.animation = 'judge_young_sit';\n\
+    this.target = null;\n\
+    this.direction = null;\n\
+\n\
+    sprite.Sprite.apply(this, [options]);\n\
+}\n\
+\n\
+JudgeYoung.prototype = clone(sprite.Sprite.prototype);\n\
+\n\
+module.exports = JudgeYoung;//@ sourceURL=stadium/judgeyoung.js"
 ));
 require.register("map/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
@@ -1557,6 +1621,7 @@ require.register("theater/index.js", Function("exports, require, module",
 var sprite = require('sprite');\n\
 var Barry = require('barry');\n\
 var loop = require('loop');\n\
+var board = require('board');\n\
 var map = require('map');\n\
 \n\
 function Theater() {\n\
@@ -1586,6 +1651,7 @@ Theater.prototype.init = function (options) {\n\
 \n\
 Theater.prototype.reset = function() {\n\
     this.screen.root = this.root;\n\
+    board.reset({mode: this});\n\
 };\n\
 \n\
 Theater.prototype.onMouseDown = function (event) {\n\
@@ -1816,11 +1882,24 @@ require.register("board/index.js", Function("exports, require, module",
 function Board() {\n\
     this.el = document.createElement('div');\n\
     this.el.setAttribute('class', 'board');\n\
+    this.dialog = document.createElement('div');\n\
+    this.dialog.setAttribute('class', 'dialog');\n\
     this.verbsDesk = new VerbsDesk({board: this});\n\
     this.verb = null;\n\
     this.subject = null;\n\
     this.mode = null;\n\
 }\n\
+\n\
+Board.prototype.notify = function (options) {\n\
+    if (!!this.notifyId) {\n\
+        clearTimeout(this.notifyId);\n\
+    }\n\
+    var dialogText = this.dialogText;\n\
+    dialogText.data = options.text;\n\
+    this.notifyId = setTimeout(function () {\n\
+        dialogText.data = '';\n\
+    }, 2000);\n\
+};\n\
 \n\
 Board.prototype.setDefault = function (options) {\n\
     this.default = options.verb;\n\
@@ -1859,6 +1938,8 @@ Board.prototype.setSubject = function (subject) {\n\
     this.subject = subject;\n\
     if (typeof subject.name === 'string') {\n\
         this.setStatus({status: this.verb.name + ' ' + this.subject.name.toUpperCase()});\n\
+    } else {\n\
+        this.setStatus({status: this.verb.name});\n\
     }\n\
 };\n\
 \n\
@@ -1875,7 +1956,7 @@ Board.prototype.activate = function () {\n\
         console.log('no mode defined');\n\
         return;\n\
     }\n\
-    this.verb.activate({subject: this.subject, mode: this.mode});\n\
+    this.verb.activate({board: this});\n\
     this.reset({mode: this.mode});\n\
 };\n\
 \n\
@@ -1884,6 +1965,8 @@ Board.prototype.render = function () {\n\
     this.statusLine.setAttribute('class', 'status-line');\n\
     this.statusText = document.createTextNode('');\n\
     this.statusLine.appendChild(this.statusText);\n\
+    this.dialogText = document.createTextNode('');\n\
+    this.dialog.appendChild(this.dialogText);\n\
     this.el.appendChild(this.statusLine);\n\
     this.el.appendChild(this.verbsDesk.render().el);\n\
     return this;    \n\
@@ -1907,7 +1990,13 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         name: 'TAKE',\n\
         \n\
         activate: function (options) {\n\
-\n\
+            var subject = options.board.subject;\n\
+            options.callback = function () {\n\
+                if (typeof subject.take === 'function') {\n\
+                    subject.take(options);\n\
+                }\n\
+            };\n\
+            verbs.go.activate(options);\n\
         }\n\
     },\n\
 \n\
@@ -1925,9 +2014,15 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         name: 'GO TO',\n\
 \n\
         activate: function (options) {\n\
-            var barry = options.mode.barry;\n\
-\n\
-            barry.walkTo(options.subject);\n\
+            var barry = options.board.mode.barry;\n\
+            var subject = options.board.subject;\n\
+            subject.walkCallback = options.callback || function () {};\n\
+            if (typeof subject.go === 'function') {\n\
+                subject.go(options);\n\
+            } else {\n\
+                barry.walkTo(subject);    \n\
+            }\n\
+            \n\
         }\n\
     },\n\
 \n\
@@ -1942,7 +2037,7 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
 \n\
     talk: {\n\
         pos: 5,\n\
-        name: 'TALK',\n\
+        name: 'TALK TO',\n\
 \n\
         activate: function (options) {\n\
 \n\
@@ -1999,6 +2094,8 @@ var clockRepair = require('clock-repair');\n\
 \n\
 sprite.Sprite.fps = 10;\n\
 \n\
+gameEl.appendChild(board.dialog);\n\
+\n\
 var screen = new canvas.Canvas({\n\
     width: 960,\n\
     height: 384,\n\
@@ -2035,6 +2132,7 @@ tile.load({url: url, success: function (options) {\n\
 }});\n\
 //@ sourceURL=boot/index.js"
 ));
+
 
 
 
@@ -2365,6 +2463,51 @@ require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventh
 require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
 require.alias("component-clone/index.js", "board/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "stadium/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("map/index.js", "boot/deps/map/index.js");
@@ -3130,6 +3273,46 @@ require.alias("component-type/index.js", "component-clone/deps/type/index.js");
 
 require.alias("board/index.js", "map/deps/board/index.js");
 require.alias("board/verbsdesk.js", "map/deps/board/verbsdesk.js");
+require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "board/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "board/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "board/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "board/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "board/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "board/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "board/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "board/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "board/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "board/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "board/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("component-clone/index.js", "board/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("board/index.js", "theater/deps/board/index.js");
+require.alias("board/verbsdesk.js", "theater/deps/board/verbsdesk.js");
 require.alias("gameponent-canvas/index.js", "board/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "board/deps/canvas/lib/canvas.js");
 require.alias("gameponent-canvas/lib/layer.js", "board/deps/canvas/lib/layer.js");
