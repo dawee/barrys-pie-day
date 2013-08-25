@@ -262,6 +262,21 @@
               "y": 384, 
               "x": 0, 
               "height": 128, 
+              "name": "introduction_0", 
+              "width": 320
+            }
+          ], 
+          "name": "introduction"
+        }, 
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 512, 
+              "x": 0, 
+              "height": 128, 
               "name": "clock-repair_0", 
               "width": 320
             }
@@ -282,6 +297,21 @@
               "y": 0, 
               "x": 0, 
               "height": 128, 
+              "name": "menu_0", 
+              "width": 320
+            }
+          ], 
+          "name": "menu"
+        }, 
+        {
+          "infos": {
+            "fps": 20
+          }, 
+          "tiles": [
+            {
+              "y": 128, 
+              "x": 0, 
+              "height": 128, 
               "name": "photograph_0", 
               "width": 320
             }
@@ -294,7 +324,7 @@
           }, 
           "tiles": [
             {
-              "y": 128, 
+              "y": 256, 
               "x": 0, 
               "height": 128, 
               "name": "lake_0", 
@@ -309,7 +339,7 @@
           }, 
           "tiles": [
             {
-              "y": 256, 
+              "y": 384, 
               "x": 0, 
               "height": 128, 
               "name": "stadium_0", 
@@ -324,7 +354,7 @@
           }, 
           "tiles": [
             {
-              "y": 384, 
+              "y": 512, 
               "x": 0, 
               "height": 128, 
               "name": "map_0", 

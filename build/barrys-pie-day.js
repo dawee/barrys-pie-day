@@ -952,213 +952,6 @@ Barry.prototype.step = function () {\n\
 \n\
 module.exports = Barry;//@ sourceURL=barry/index.js"
 ));
-require.register("gameponent-geom/index.js", Function("exports, require, module",
-"exports.Vector = require('./lib/vector');\n\
-exports.Point = require('./lib/point');\n\
-exports.Rect = require('./lib/rect');\n\
-//@ sourceURL=gameponent-geom/index.js"
-));
-require.register("gameponent-geom/lib/point.js", Function("exports, require, module",
-"var Vector = require('./vector');\n\
-\n\
-function Point (options) {\n\
-    options = options || {};\n\
-    this.x = options.x || 0;\n\
-    this.y = options.y || 0;\n\
-};\n\
-\n\
-Point.prototype.translate = function (options) {\n\
-    if (options.vector instanceof Vector) {\n\
-        _translateByVector(this, options.vector);\n\
-    } else {\n\
-        _translateByValues(this, options.tx || 0, options.ty || 0);\n\
-    }\n\
-    return this;\n\
-};\n\
-\n\
-function _translateByVector(point, vector) {\n\
-    point.x += vector.dx;\n\
-    point.y += vector.dy;\n\
-};\n\
-\n\
-function _translateByValues(point, tx, ty) {\n\
-    point.x += tx;\n\
-    point.y += ty;\n\
-};\n\
-\n\
-module.exports = Point;//@ sourceURL=gameponent-geom/lib/point.js"
-));
-require.register("gameponent-geom/lib/vector.js", Function("exports, require, module",
-"function Vector(dx, dy) {\n\
-    this.dx = dx || 0;\n\
-    this.dy = dy || 0;\n\
-}\n\
-\n\
-Vector.prototype.getLength = function () {\n\
-    Math.sqrt(Math.pow(this.dx) + Math.pow(this.dy));\n\
-};\n\
-\n\
-module.exports = Vector;//@ sourceURL=gameponent-geom/lib/vector.js"
-));
-require.register("gameponent-geom/lib/rect.js", Function("exports, require, module",
-"var Point = require('./point');\n\
-\n\
-function _containsRect(rect, other) {\n\
-    return (rect.left <= other.left) && (rect.top >= other.top)\n\
-        && (rect.left + rect.width >= other.left + other.width)\n\
-        && (rect.top - rect.height <= other.top - other.height)\n\
-        && (rect.left + rect.width > other.left)\n\
-        && (rect.top - rect.height < other.top);\n\
-};\n\
-\n\
-function _containsPoint(rect, other) {\n\
-    return (rect.left <= other.x)\n\
-        && (rect.top >= other.y)\n\
-        && (rect.left + rect.width >= other.x)\n\
-        && (rect.top - rect.height <= other.y);\n\
-};\n\
-\n\
-function Rect(options) {\n\
-    options = options || {};\n\
-    this.left = options.left || 0;\n\
-    this.top = options.top || 0;\n\
-    this.width = options.width || 0;\n\
-    this.height = options.height || 0;\n\
-}\n\
-\n\
-Rect.prototype.right = function () {\n\
-    return this.left + this.height;\n\
-};\n\
-\n\
-Rect.prototype.bottom = function () {\n\
-    return this.top - this.height;\n\
-};\n\
-\n\
-Rect.prototype.contains = function (options) {\n\
-    var result = false;\n\
-    \n\
-    if (options.rect instanceof Rect) {\n\
-        result = _containsRect(this, options.rect);\n\
-    } else {\n\
-        result = _containsPoint(this, options.point);\n\
-    }\n\
-\n\
-    return result;\n\
-};\n\
-\n\
-Rect.prototype.intersectTop = function (options) {\n\
-    var other = options.rect;\n\
-\n\
-    return (other.top > this.top && (\n\
-        other.contains({point: this.topLeftPoint()})\n\
-        || other.contains({point: this.topRightPoint()})\n\
-        || this.contains({point: other.bottomLeftPoint()}) \n\
-        || this.contains({point: other.bottomRightPoint()})\n\
-    ));\n\
-}\n\
-\n\
-Rect.prototype.intersectBottom = function (options) {\n\
-    var other = options.rect;\n\
-\n\
-    return other.intersectTop({rect: this});\n\
-}\n\
-\n\
-Rect.prototype.intersectLeft = function (options) {\n\
-    var other = options.rect;\n\
-\n\
-    return (other.left < this.left && (\n\
-        other.contains({point: this.topLeftPoint()})\n\
-        || other.contains({point: this.bottomLeftPoint()})\n\
-        || this.contains({point: other.topRightPoint()}) \n\
-        || this.contains({point: other.bottomRightPoint()})\n\
-    ));\n\
-};\n\
-\n\
-Rect.prototype.intersectRight = function (options) {\n\
-    var other = options.rect;\n\
-\n\
-    return other.intersectLeft({rect: this});\n\
-};\n\
-\n\
-Rect.prototype.centerPoint = function () {\n\
-    return new Point({x: this.left + this.width / 2, y: this.top - this.height / 2});\n\
-};\n\
-\n\
-Rect.prototype.topLeftPoint = function () {\n\
-    return new Point({x: this.left, y: this.top});\n\
-};\n\
-\n\
-Rect.prototype.topRightPoint = function () {\n\
-    return new Point({x: this.right(), y: this.top});\n\
-};\n\
-\n\
-Rect.prototype.bottomLeftPoint = function () {\n\
-    return new Point({x: this.left, y: this.bottom()});\n\
-};\n\
-\n\
-Rect.prototype.bottomRightPoint = function () {\n\
-    return new Point({x: this.right(), y: this.bottom()});\n\
-};\n\
-\n\
-Rect.prototype.copy = function() {\n\
-    return new Rect({left: this.left, top: this.top, width: this.width, height: this.height});\n\
-};\n\
-\n\
-Rect.createCenteredHitbox = function (width, height) {\n\
-    return new Rect(-width / 2, -height / 2, width, height);\n\
-};\n\
-\n\
-module.exports = Rect;//@ sourceURL=gameponent-geom/lib/rect.js"
-));
-require.register("area/index.js", Function("exports, require, module",
-"var geom = require('geom');\n\
-\n\
-Area.Rect = geom.Rect;\n\
-\n\
-function Area(options) {\n\
-    this.screen = options.screen;\n\
-    this.areas = options.areas || [];\n\
-}\n\
-\n\
-Area.prototype.getPoint = function (options) {\n\
-    var x = options.offsetX === undefined ? options.layerX : options.offsetX;\n\
-    var y = options.offsetY === undefined ? options.layerY : options.offsetY;\n\
-\n\
-    return new geom.Point({\n\
-        x: (x * this.screen.viewport.width) / this.screen.width,\n\
-        y: this.screen.viewport.height - ((y * this.screen.viewport.height) / this.screen.height)\n\
-    });\n\
-};\n\
-\n\
-Area.prototype.onMouseMove = function (options) {\n\
-    var point = this.getPoint(options);\n\
-\n\
-    this.areas.forEach(function (area) {\n\
-        if (area.contains({point: point}) && typeof area.hover === 'function') {\n\
-            area.hover();\n\
-        }\n\
-    });\n\
-};\n\
-\n\
-Area.prototype.onMouseDown = function (options) {\n\
-    var point = this.getPoint(options);\n\
-    \n\
-    this.areas.forEach(function (area) {\n\
-        if (area.contains({point: point}) && typeof area.click === 'function') {\n\
-            area.click();\n\
-        }\n\
-    });\n\
-};\n\
-\n\
-Area.define = function (options) {\n\
-    var rect = new geom.Rect(options);\n\
-    rect.click = options.click;\n\
-    rect.hover = options.hover;\n\
-    return rect;\n\
-};\n\
-\n\
-module.exports = Area;//@ sourceURL=area/index.js"
-));
 require.register("stadium/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var sprite = require('sprite');\n\
@@ -2690,6 +2483,213 @@ Combination.prototype.tryUseCombination = function (options) {\n\
 \n\
 module.exports = Combination;//@ sourceURL=board/combination.js"
 ));
+require.register("gameponent-geom/index.js", Function("exports, require, module",
+"exports.Vector = require('./lib/vector');\n\
+exports.Point = require('./lib/point');\n\
+exports.Rect = require('./lib/rect');\n\
+//@ sourceURL=gameponent-geom/index.js"
+));
+require.register("gameponent-geom/lib/point.js", Function("exports, require, module",
+"var Vector = require('./vector');\n\
+\n\
+function Point (options) {\n\
+    options = options || {};\n\
+    this.x = options.x || 0;\n\
+    this.y = options.y || 0;\n\
+};\n\
+\n\
+Point.prototype.translate = function (options) {\n\
+    if (options.vector instanceof Vector) {\n\
+        _translateByVector(this, options.vector);\n\
+    } else {\n\
+        _translateByValues(this, options.tx || 0, options.ty || 0);\n\
+    }\n\
+    return this;\n\
+};\n\
+\n\
+function _translateByVector(point, vector) {\n\
+    point.x += vector.dx;\n\
+    point.y += vector.dy;\n\
+};\n\
+\n\
+function _translateByValues(point, tx, ty) {\n\
+    point.x += tx;\n\
+    point.y += ty;\n\
+};\n\
+\n\
+module.exports = Point;//@ sourceURL=gameponent-geom/lib/point.js"
+));
+require.register("gameponent-geom/lib/vector.js", Function("exports, require, module",
+"function Vector(dx, dy) {\n\
+    this.dx = dx || 0;\n\
+    this.dy = dy || 0;\n\
+}\n\
+\n\
+Vector.prototype.getLength = function () {\n\
+    Math.sqrt(Math.pow(this.dx) + Math.pow(this.dy));\n\
+};\n\
+\n\
+module.exports = Vector;//@ sourceURL=gameponent-geom/lib/vector.js"
+));
+require.register("gameponent-geom/lib/rect.js", Function("exports, require, module",
+"var Point = require('./point');\n\
+\n\
+function _containsRect(rect, other) {\n\
+    return (rect.left <= other.left) && (rect.top >= other.top)\n\
+        && (rect.left + rect.width >= other.left + other.width)\n\
+        && (rect.top - rect.height <= other.top - other.height)\n\
+        && (rect.left + rect.width > other.left)\n\
+        && (rect.top - rect.height < other.top);\n\
+};\n\
+\n\
+function _containsPoint(rect, other) {\n\
+    return (rect.left <= other.x)\n\
+        && (rect.top >= other.y)\n\
+        && (rect.left + rect.width >= other.x)\n\
+        && (rect.top - rect.height <= other.y);\n\
+};\n\
+\n\
+function Rect(options) {\n\
+    options = options || {};\n\
+    this.left = options.left || 0;\n\
+    this.top = options.top || 0;\n\
+    this.width = options.width || 0;\n\
+    this.height = options.height || 0;\n\
+}\n\
+\n\
+Rect.prototype.right = function () {\n\
+    return this.left + this.height;\n\
+};\n\
+\n\
+Rect.prototype.bottom = function () {\n\
+    return this.top - this.height;\n\
+};\n\
+\n\
+Rect.prototype.contains = function (options) {\n\
+    var result = false;\n\
+    \n\
+    if (options.rect instanceof Rect) {\n\
+        result = _containsRect(this, options.rect);\n\
+    } else {\n\
+        result = _containsPoint(this, options.point);\n\
+    }\n\
+\n\
+    return result;\n\
+};\n\
+\n\
+Rect.prototype.intersectTop = function (options) {\n\
+    var other = options.rect;\n\
+\n\
+    return (other.top > this.top && (\n\
+        other.contains({point: this.topLeftPoint()})\n\
+        || other.contains({point: this.topRightPoint()})\n\
+        || this.contains({point: other.bottomLeftPoint()}) \n\
+        || this.contains({point: other.bottomRightPoint()})\n\
+    ));\n\
+}\n\
+\n\
+Rect.prototype.intersectBottom = function (options) {\n\
+    var other = options.rect;\n\
+\n\
+    return other.intersectTop({rect: this});\n\
+}\n\
+\n\
+Rect.prototype.intersectLeft = function (options) {\n\
+    var other = options.rect;\n\
+\n\
+    return (other.left < this.left && (\n\
+        other.contains({point: this.topLeftPoint()})\n\
+        || other.contains({point: this.bottomLeftPoint()})\n\
+        || this.contains({point: other.topRightPoint()}) \n\
+        || this.contains({point: other.bottomRightPoint()})\n\
+    ));\n\
+};\n\
+\n\
+Rect.prototype.intersectRight = function (options) {\n\
+    var other = options.rect;\n\
+\n\
+    return other.intersectLeft({rect: this});\n\
+};\n\
+\n\
+Rect.prototype.centerPoint = function () {\n\
+    return new Point({x: this.left + this.width / 2, y: this.top - this.height / 2});\n\
+};\n\
+\n\
+Rect.prototype.topLeftPoint = function () {\n\
+    return new Point({x: this.left, y: this.top});\n\
+};\n\
+\n\
+Rect.prototype.topRightPoint = function () {\n\
+    return new Point({x: this.right(), y: this.top});\n\
+};\n\
+\n\
+Rect.prototype.bottomLeftPoint = function () {\n\
+    return new Point({x: this.left, y: this.bottom()});\n\
+};\n\
+\n\
+Rect.prototype.bottomRightPoint = function () {\n\
+    return new Point({x: this.right(), y: this.bottom()});\n\
+};\n\
+\n\
+Rect.prototype.copy = function() {\n\
+    return new Rect({left: this.left, top: this.top, width: this.width, height: this.height});\n\
+};\n\
+\n\
+Rect.createCenteredHitbox = function (width, height) {\n\
+    return new Rect(-width / 2, -height / 2, width, height);\n\
+};\n\
+\n\
+module.exports = Rect;//@ sourceURL=gameponent-geom/lib/rect.js"
+));
+require.register("area/index.js", Function("exports, require, module",
+"var geom = require('geom');\n\
+\n\
+Area.Rect = geom.Rect;\n\
+\n\
+function Area(options) {\n\
+    this.screen = options.screen;\n\
+    this.areas = options.areas || [];\n\
+}\n\
+\n\
+Area.prototype.getPoint = function (options) {\n\
+    var x = options.offsetX === undefined ? options.layerX : options.offsetX;\n\
+    var y = options.offsetY === undefined ? options.layerY : options.offsetY;\n\
+\n\
+    return new geom.Point({\n\
+        x: (x * this.screen.viewport.width) / this.screen.width,\n\
+        y: this.screen.viewport.height - ((y * this.screen.viewport.height) / this.screen.height)\n\
+    });\n\
+};\n\
+\n\
+Area.prototype.onMouseMove = function (options) {\n\
+    var point = this.getPoint(options);\n\
+\n\
+    this.areas.forEach(function (area) {\n\
+        if (area.contains({point: point}) && typeof area.hover === 'function') {\n\
+            area.hover();\n\
+        }\n\
+    });\n\
+};\n\
+\n\
+Area.prototype.onMouseDown = function (options) {\n\
+    var point = this.getPoint(options);\n\
+    \n\
+    this.areas.forEach(function (area) {\n\
+        if (area.contains({point: point}) && typeof area.click === 'function') {\n\
+            area.click();\n\
+        }\n\
+    });\n\
+};\n\
+\n\
+Area.define = function (options) {\n\
+    var rect = new geom.Rect(options);\n\
+    rect.click = options.click;\n\
+    rect.hover = options.hover;\n\
+    return rect;\n\
+};\n\
+\n\
+module.exports = Area;//@ sourceURL=area/index.js"
+));
 require.register("boot/index.js", Function("exports, require, module",
 "var canvas = require('canvas');\n\
 var gameEl = document.getElementById('game');\n\
@@ -2707,7 +2707,8 @@ var theater = require('theater');\n\
 var pizzeria = require('pizzeria');\n\
 var bakery = require('bakery');\n\
 var clockRepair = require('clock-repair');\n\
-\n\
+var menu = require('./menu');\n\
+var introduction = require('./introduction');\n\
 \n\
 sprite.Sprite.fps = 10;\n\
 \n\
@@ -2731,6 +2732,9 @@ tile.load({url: url, success: function (options) {\n\
     loader.load({tilesets: options.tilesets, callback: function () {\n\
         var opt = {screen: screen, tilesets: options.tilesets};\n\
 \n\
+        menu.init(opt);\n\
+        introduction.init(opt);\n\
+\n\
         map.init({screen: screen, tilesets: options.tilesets, places: {\n\
             stadium: stadium.init(opt),\n\
             photograph: photograph.init(opt),\n\
@@ -2742,12 +2746,126 @@ tile.load({url: url, success: function (options) {\n\
         }});\n\
         \n\
 \n\
-        loop.setMode({mode: stadium});\n\
+        loop.setMode({mode: menu});\n\
         loop.start({mouseArea: screen.el});\n\
     }});\n\
 \n\
 }});\n\
 //@ sourceURL=boot/index.js"
+));
+require.register("boot/menu.js", Function("exports, require, module",
+"var canvas = require('canvas');\n\
+var sprite = require('sprite');\n\
+var loop = require('loop');\n\
+var board = require('board');\n\
+var Area = require('area');\n\
+var introduction = require('./introduction');\n\
+\n\
+function Menu() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
+\n\
+Menu.prototype.init = function (options) {\n\
+    this.screen = options.screen;\n\
+    this.tilesets = options.tilesets;\n\
+    this.layer.addView({view: new canvas.ImageView({\n\
+        image: this.tilesets.bg_b.groups.menu.tile(),\n\
+        x: 160,\n\
+        y: 64\n\
+    })});\n\
+    var play = Area.define({\n\
+        left: 255,\n\
+        top: 71,\n\
+        width: 60,\n\
+        height: 45,\n\
+        click: function () {\n\
+            console.log('set mode');\n\
+            loop.setMode({mode: introduction});\n\
+        },\n\
+    });\n\
+    this.areas = new Area({screen: this.screen, areas: [play]});\n\
+    return this;\n\
+};\n\
+\n\
+Menu.prototype.reset = function() {\n\
+    board.setVerb({verb: {name: ''}});\n\
+    this.screen.root = this.root;\n\
+    board.hide();\n\
+};\n\
+\n\
+Menu.prototype.onMouseDown = function (event) {\n\
+    this.areas.onMouseDown(event);\n\
+};\n\
+\n\
+Menu.prototype.draw = function () {\n\
+    this.screen.draw();\n\
+};\n\
+\n\
+module.exports = new Menu();//@ sourceURL=boot/menu.js"
+));
+require.register("boot/introduction.js", Function("exports, require, module",
+"var canvas = require('canvas');\n\
+var sprite = require('sprite');\n\
+var loop = require('loop');\n\
+var board = require('board');\n\
+var Area = require('area');\n\
+var stadium = require('stadium');\n\
+\n\
+function Introduction() {\n\
+    this.root = new canvas.LayerGroup();\n\
+    this.layer = new canvas.Layer();\n\
+    this.root.addLayer({layer: this.layer});\n\
+}\n\
+\n\
+Introduction.prototype.init = function (options) {\n\
+    this.screen = options.screen;\n\
+    this.tilesets = options.tilesets;\n\
+    this.layer.addView({view: new canvas.ImageView({\n\
+        image: this.tilesets.bg_a.groups.introduction.tile(),\n\
+        x: 160,\n\
+        y: 64\n\
+    })});\n\
+    return this;\n\
+};\n\
+\n\
+Introduction.prototype.reset = function() {\n\
+    console.log('reset introduction');\n\
+    board.setVerb({verb: {name: ''}});\n\
+    this.screen.root = this.root;\n\
+    board.hide();\n\
+    board.talk({\n\
+        sentences: [\n\
+            {text: 'Here are the results for this 33rd edition of \"The Best Pie Eater\"'},\n\
+            {text: 'John, with 9 pies : third place'},\n\
+            {text: 'Jim, with 12 pies : second place'},\n\
+            {text: 'Tom, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Peter, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Tom, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'William, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Jonathan, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'David, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Colin, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Philip, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Mickael, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'Barry, with 12 pies : second place, ex-aequo'},\n\
+            {text: 'You got to be kidding me ...', talker: 'barry'},\n\
+            {text: 'And Chuck, with 15 pies, first place.'},\n\
+            {text: 'Congratulations, all of you'},\n\
+            {text: 'I need to talk to the judges', talker: 'barry'},\n\
+        ],\n\
+        callback: function () {\n\
+            loop.setMode({mode: stadium});\n\
+        }\n\
+    })\n\
+};\n\
+\n\
+Introduction.prototype.draw = function () {\n\
+    this.screen.draw();\n\
+};\n\
+\n\
+module.exports = new Introduction();//@ sourceURL=boot/introduction.js"
 ));
 
 
@@ -2765,6 +2883,8 @@ tile.load({url: url, success: function (options) {\n\
 
 
 require.alias("boot/index.js", "barrys-pie-day/deps/boot/index.js");
+require.alias("boot/menu.js", "barrys-pie-day/deps/boot/menu.js");
+require.alias("boot/introduction.js", "barrys-pie-day/deps/boot/introduction.js");
 require.alias("boot/index.js", "boot/index.js");
 require.alias("gameponent-canvas/index.js", "boot/deps/canvas/index.js");
 require.alias("gameponent-canvas/lib/canvas.js", "boot/deps/canvas/lib/canvas.js");
@@ -4837,4 +4957,49 @@ require.alias("gameponent-loop/lib/eventhandler.js", "board/deps/loop/lib/eventh
 require.alias("gameponent-loop/index.js", "board/deps/loop/index.js");
 require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
 require.alias("component-clone/index.js", "board/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("area/index.js", "boot/deps/area/index.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "area/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "area/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "area/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "area/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "area/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "area/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("gameponent-tile/lib/tileset.js", "area/deps/tile/lib/tileset.js");
+require.alias("gameponent-tile/lib/tile.js", "area/deps/tile/lib/tile.js");
+require.alias("gameponent-tile/lib/tilegroup.js", "area/deps/tile/lib/tilegroup.js");
+require.alias("gameponent-tile/index.js", "area/deps/tile/index.js");
+require.alias("jofan-get-file/index.js", "gameponent-tile/deps/get-file/index.js");
+
+require.alias("gameponent-tile/index.js", "gameponent-tile/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-sprite/index.js", "area/deps/sprite/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/lib/canvas.js", "gameponent-sprite/deps/canvas/lib/canvas.js");
+require.alias("gameponent-canvas/lib/layer.js", "gameponent-sprite/deps/canvas/lib/layer.js");
+require.alias("gameponent-canvas/lib/layergroup.js", "gameponent-sprite/deps/canvas/lib/layergroup.js");
+require.alias("gameponent-canvas/lib/imageview.js", "gameponent-sprite/deps/canvas/lib/imageview.js");
+require.alias("gameponent-canvas/lib/drawable.js", "gameponent-sprite/deps/canvas/lib/drawable.js");
+require.alias("gameponent-canvas/index.js", "gameponent-sprite/deps/canvas/index.js");
+require.alias("gameponent-canvas/index.js", "gameponent-canvas/index.js");
+require.alias("component-clone/index.js", "gameponent-sprite/deps/clone/index.js");
+require.alias("component-type/index.js", "component-clone/deps/type/index.js");
+
+require.alias("gameponent-sprite/index.js", "gameponent-sprite/index.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/lib/modestack.js", "area/deps/loop/lib/modestack.js");
+require.alias("gameponent-loop/lib/eventhandler.js", "area/deps/loop/lib/eventhandler.js");
+require.alias("gameponent-loop/index.js", "area/deps/loop/index.js");
+require.alias("gameponent-loop/index.js", "gameponent-loop/index.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/lib/point.js", "area/deps/geom/lib/point.js");
+require.alias("gameponent-geom/lib/vector.js", "area/deps/geom/lib/vector.js");
+require.alias("gameponent-geom/lib/rect.js", "area/deps/geom/lib/rect.js");
+require.alias("gameponent-geom/index.js", "area/deps/geom/index.js");
+require.alias("gameponent-geom/index.js", "gameponent-geom/index.js");
+require.alias("component-clone/index.js", "area/deps/clone/index.js");
 require.alias("component-type/index.js", "component-clone/deps/type/index.js");
