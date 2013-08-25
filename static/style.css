@@ -26,6 +26,8 @@ body {
 
 #game .dialog.barry { color: #008163; }
 #game .dialog.judge-woman { color: #e81919; }
+#game .dialog.judge-glass { color: #c6c0bd; }
+#game .dialog.judge-young { color: #c69a83; }
 
 
 #game canvas {

@@ -1219,6 +1219,8 @@ Stadium.prototype.init = function (options) {\n\
 \n\
     this.areas = new Area({screen: this.screen, areas: [\n\
         this.judgeWoman,\n\
+        this.judgeGlass,\n\
+        this.judgeYoung,\n\
         town\n\
     ]});\n\
     return this;\n\
@@ -1343,8 +1345,12 @@ module.exports = JudgeWoman;//@ sourceURL=stadium/judgewoman.js"
 require.register("stadium/judgeglass.js", Function("exports, require, module",
 "var sprite = require('sprite');\n\
 var clone = require('clone');\n\
+var Area = require('area');\n\
+var board = require('board');\n\
 \n\
 function JudgeGlass(options) {\n\
+    this.name = \"JUDGE WITH GLASSES\";\n\
+\n\
     this.screen = options.screen;\n\
     options.tileset = options.tilesets.judges;\n\
     options.animation = 'judge_glass_sit';\n\
@@ -1352,17 +1358,67 @@ function JudgeGlass(options) {\n\
     this.direction = null;\n\
 \n\
     sprite.Sprite.apply(this, [options]);\n\
+    this.left = this.x - this.width / 2;\n\
+    this.top = this.y + this.height / 2;\n\
+    this.width = this.image.width;\n\
+    this.height = this.image.height;    \n\
 }\n\
 \n\
 JudgeGlass.prototype = clone(sprite.Sprite.prototype);\n\
+JudgeGlass.prototype.contains = Area.Rect.prototype.contains;\n\
+\n\
+JudgeGlass.prototype.hover = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeGlass.prototype.click = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeGlass.prototype.talk = function () {\n\
+    if (!board.is('judge-glass:talk:first')) {\n\
+        board.talk({sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hello mister', talker: 'judge-glass'},\n\
+                {text: 'I want to be the only second of the competition', talker: 'barry'},\n\
+                {text: 'There is no reason for that mister', talker: 'judge-glass'},\n\
+                {text: 'You ate exactly the same number of pie as the others 9', talker: 'judge-glass'},\n\
+                {text: 'Yeah, but I was faster', talker: 'barry'},                \n\
+                {text: 'Interesting ...', talker: 'judge-glass'},\n\
+                {text: 'Well this is a good idea to count time in the competition', talker: 'judge-glass'},\n\
+                {text: 'Great ! So you will look at my time ?', talker: 'barry'},                \n\
+                {text: 'No', talker: 'judge-glass'},\n\
+                {text: 'But, why not ?', talker: 'barry'},                \n\
+                {text: 'We don\\'t have a chrono', talker: 'judge-glass'},\n\
+                {text: 'We have nothing to measure time', talker: 'judge-glass'},\n\
+                {text: 'Bring me something to measure time and I\\'ll watch your time', talker: 'judge-glass'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('judge-glass:talk:first', true);\n\
+            }\n\
+        });\n\
+    } else {\n\
+        board.talk({sentences: [\n\
+            {text: 'Hi', talker: 'barry'},\n\
+            {text: 'Hello mister', talker: 'judge-glass'},\n\
+            {text: 'Did you find the chrono ?', talker: 'judge-glass'},\n\
+            {text: 'No', talker: 'barry'},\n\
+            {text: 'Look for it !', talker: 'judge-glass'},\n\
+        ]});\n\
+    }\n\
+};\n\
 \n\
 module.exports = JudgeGlass;//@ sourceURL=stadium/judgeglass.js"
 ));
 require.register("stadium/judgeyoung.js", Function("exports, require, module",
 "var sprite = require('sprite');\n\
 var clone = require('clone');\n\
+var Area = require('area');\n\
+var board = require('board');\n\
 \n\
 function JudgeYoung(options) {\n\
+    this.name = \"YOUNG JUDGE\";\n\
+\n\
     this.screen = options.screen;\n\
     options.tileset = options.tilesets.judges;\n\
     options.animation = 'judge_young_sit';\n\
@@ -1370,9 +1426,48 @@ function JudgeYoung(options) {\n\
     this.direction = null;\n\
 \n\
     sprite.Sprite.apply(this, [options]);\n\
+    this.left = this.x - this.width / 2;\n\
+    this.top = this.y + this.height / 2;\n\
+    this.width = this.image.width;\n\
+    this.height = this.image.height;     \n\
 }\n\
 \n\
 JudgeYoung.prototype = clone(sprite.Sprite.prototype);\n\
+JudgeYoung.prototype.contains = Area.Rect.prototype.contains;\n\
+\n\
+\n\
+JudgeYoung.prototype.hover = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeYoung.prototype.click = function () {\n\
+    board.setSubject(this);\n\
+};\n\
+\n\
+JudgeYoung.prototype.talk = function () {\n\
+    if (!board.is('judge-young:talk:first')) {\n\
+        board.talk({sentences: [\n\
+                {text: 'Hi', talker: 'barry'},\n\
+                {text: 'Hi man !', talker: 'judge-young'},\n\
+                {text: 'I\\'ve heard you were disapointed about your score', talker: 'judge-young'},\n\
+                {text: 'I can help you to change your place if you want, huhu.', talker: 'judge-young'},\n\
+                {text: 'Oh yeah ? Great !', talker: 'barry'},\n\
+                {text: 'Ya man, but it\\'s giving giving you know ?', talker: 'judge-young'},\n\
+                {text: 'Yes ... I start to understand this, what do you want ?', talker: 'barry'},\n\
+                {text: 'Don\\'t know dude, something hot and cool', talker: 'judge-young'},\n\
+                {text: '... and hot, huhu', talker: 'judge-young'},\n\
+            ],\n\
+            callback: function () {\n\
+                board.set('judge-young:talk:first', true);\n\
+            }\n\
+        });\n\
+    } else {\n\
+        board.talk({sentences: [\n\
+            {text: 'Hi', talker: 'barry'},\n\
+            {text: 'Don\\'t loose your mojo man !', talker: 'judge-young'},\n\
+        ]});\n\
+    }\n\
+};\n\
 \n\
 module.exports = JudgeYoung;//@ sourceURL=stadium/judgeyoung.js"
 ));
