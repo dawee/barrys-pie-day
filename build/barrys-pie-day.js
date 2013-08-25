@@ -1276,7 +1276,7 @@ function JudgeWoman(options) {\n\
     this.name = \"JUDGE WOMAN\";\n\
 \n\
     this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
+    options.tileset = options.tilesets.pnj;\n\
     options.animation = 'judge_woman_sit';\n\
     this.target = null;\n\
     this.direction = null;\n\
@@ -1352,7 +1352,7 @@ function JudgeGlass(options) {\n\
     this.name = \"JUDGE WITH GLASSES\";\n\
 \n\
     this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
+    options.tileset = options.tilesets.pnj;\n\
     options.animation = 'judge_glass_sit';\n\
     this.target = null;\n\
     this.direction = null;\n\
@@ -1420,7 +1420,7 @@ function JudgeYoung(options) {\n\
     this.name = \"YOUNG JUDGE\";\n\
 \n\
     this.screen = options.screen;\n\
-    options.tileset = options.tilesets.judges;\n\
+    options.tileset = options.tilesets.pnj;\n\
     options.animation = 'judge_young_sit';\n\
     this.target = null;\n\
     this.direction = null;\n\
@@ -1500,7 +1500,7 @@ var areas = {\n\
         width: 40,\n\
         height: 22,\n\
         click: function () {\n\
-            loop.setMode({mode: places.photograph});\n\
+            // TODO : loop.setMode({mode: places.photograph});\n\
         },\n\
         hover: function () {\n\
             board.setSubject({name: 'Photograph'});\n\
@@ -1513,7 +1513,7 @@ var areas = {\n\
         width: 40,\n\
         height: 30,\n\
         click: function () {\n\
-            loop.setMode({mode: places.lake});    \n\
+            // TODO : loop.setMode({mode: places.lake});    \n\
         },\n\
         hover: function () {\n\
             board.setSubject({name: 'Lake'});\n\
@@ -1526,7 +1526,7 @@ var areas = {\n\
         width: 45,\n\
         height: 34,\n\
         click: function () {\n\
-            loop.setMode({mode: places.theater});\n\
+            // TODO : loop.setMode({mode: places.theater});\n\
         },\n\
         hover: function () {\n\
             board.setSubject({name: 'Theater'});\n\
@@ -1565,7 +1565,7 @@ var areas = {\n\
         width: 32,\n\
         height: 27,\n\
         click: function () {\n\
-            loop.setMode({mode: places.clockRepair});\n\
+            // TODO : loop.setMode({mode: places.clockRepair});\n\
         },\n\
         hover: function () {\n\
             board.setSubject({name: 'Clock Repair'});\n\
@@ -1926,12 +1926,27 @@ Bakery.prototype.init = function (options) {\n\
         },\n\
         go: function () {}\n\
     });\n\
+    town.name = \"TOWN\";\n\
+\n\
+    var ventilation = Area.define({left: 145, top: 81, width: 46, height: 34,\n\
+        hover: function () {\n\
+            board.setSubject(ventilation);\n\
+        },\n\
+        click: function () {\n\
+            board.setSubject(ventilation);\n\
+        },\n\
+    });\n\
+    ventilation.x = ventilation.left + ventilation.width / 2;\n\
+    ventilation.name = 'VENTILATION';\n\
+    ventilation.look = function () {\n\
+        board.notify({text: 'It\\'s warm and it smells good bread', talker: 'barry'});\n\
+    };\n\
 \n\
     this.bin = new Bin({screen: this.screen, tilesets: this.tilesets, x: 43, y: 82});\n\
     this.layer.addView({view: this.bin});\n\
 \n\
     this.areas = new Area({screen: this.screen, areas: [\n\
-        town, this.bin\n\
+        town, ventilation, this.bin\n\
     ]});\n\
     return this;\n\
 };\n\
@@ -1987,10 +2002,13 @@ var items = {\n\
     },\n\
     'dry-pen': {\n\
         id: 'dry-pen',\n\
-        name: 'Dry Ball Pen'  \n\
+        name: 'Dry Ball Pen'\n\
     },\n\
+    pen: {\n\
+        id: 'pen',\n\
+        name: 'Pen'\n\
+    }\n\
 };\n\
-\n\
 \n\
 function Bin(options) {\n\
     this.name = \"PUBLIC BIN\";\n\
@@ -2036,21 +2054,6 @@ Bin.prototype.look = function() {\n\
             callback: function () {\n\
                 board.addItem({item: items.doll});\n\
                 board.addItem({item: items['dry-pen']});\n\
-\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-                board.addItem({item: items.doll});\n\
-                board.addItem({item: items['dry-pen']});\n\
-\n\
-\n\
                 board.notify({text: '2 OBJECTS FOUND'});\n\
                 board.set('bin:look', true);\n\
             }\n\
@@ -2132,7 +2135,7 @@ require.register("board/index.js", Function("exports, require, module",
 "var VerbsDesk = require('./verbsdesk');\n\
 var switches = {};\n\
 var speechDuration = 500;\n\
-var defaultDuration = 500;\n\
+var defaultDuration = 2000;\n\
 var items = [];\n\
 \n\
 window.setSpeechDuration = function (duration) {\n\
@@ -2155,6 +2158,7 @@ function Board() {\n\
     this.subject = null;\n\
     this.mode = null;\n\
     this.inventorySlot = 0;\n\
+    this.handled = null;\n\
 }\n\
 \n\
 Board.prototype.notify = function (options) {\n\
@@ -2165,6 +2169,7 @@ Board.prototype.notify = function (options) {\n\
     delay = delay < defaultDuration ? defaultDuration : delay;\n\
     this.dialog.setAttribute('class', 'dialog ' + talker);\n\
     dialogText.data = options.text;\n\
+    console.log(talker.toUpperCase() + ' : ' + options.text, delay);\n\
     this.notifyId = setTimeout(function () {\n\
         dialogText.data = '';\n\
         callback();\n\
@@ -2235,6 +2240,11 @@ Board.prototype.updateInventory = function () {\n\
         el.appendChild(document.createTextNode(item.name));\n\
         if (typeof item.select === 'function') {\n\
             el.addEventListener('click', item.select);\n\
+        } else {\n\
+            var that = this;\n\
+            el.addEventListener('click', function () {\n\
+                that.selectItem({item: item});\n\
+            });\n\
         }\n\
         this.inventory.appendChild(el);\n\
     }, this);\n\
@@ -2261,6 +2271,18 @@ Board.prototype.showNextSentence = function() {\n\
     }\n\
 };\n\
 \n\
+Board.prototype.selectItem = function (options) {\n\
+    var item = options.item;\n\
+\n\
+    if (this.handled === null && typeof this.verb.name === 'function') {\n\
+        this.handled = item;\n\
+        this.setVerb({verb: this.verb})\n\
+    } else {\n\
+        this.setSubject(item);\n\
+        this.activate();\n\
+    }\n\
+};\n\
+\n\
 Board.prototype.setDefault = function (options) {\n\
     this.default = options.verb;\n\
     this.setVerb({verb: this.default});\n\
@@ -2273,6 +2295,7 @@ Board.prototype.reset = function (options) {\n\
     }\n\
     this.setVerb({verb: this.default});\n\
     this.subject = null;\n\
+    this.handled = null;\n\
     this.show();\n\
 };\n\
 \n\
@@ -2291,15 +2314,19 @@ Board.prototype.setStatus = function (options) {\n\
 \n\
 Board.prototype.setVerb = function (options) {\n\
     this.verb = options.verb;\n\
-    this.setStatus({status: this.verb.name});\n\
+    var verbName = typeof this.verb.name === 'function' ? this.verb.name() : this.verb.name;\n\
+\n\
+    this.setStatus({status: verbName});\n\
 };\n\
 \n\
 Board.prototype.setSubject = function (subject) {\n\
     this.subject = subject;\n\
+    var verbName = typeof this.verb.name === 'function' ? this.verb.name() : this.verb.name;\n\
+\n\
     if (typeof subject.name === 'string') {\n\
-        this.setStatus({status: this.verb.name + ' ' + this.subject.name.toUpperCase()});\n\
+        this.setStatus({status: verbName + ' ' + subject.name});\n\
     } else {\n\
-        this.setStatus({status: this.verb.name});\n\
+        this.setStatus({status: verbName});\n\
     }\n\
 };\n\
 \n\
@@ -2319,6 +2346,7 @@ Board.prototype.activate = function () {\n\
     this.verb.activate({board: this});\n\
     this.setVerb({verb: this.default});\n\
     this.subject = null;\n\
+    this.handled = null;\n\
 };\n\
 \n\
 Board.prototype.render = function () {\n\
@@ -2337,7 +2365,9 @@ Board.prototype.render = function () {\n\
 module.exports = new Board();//@ sourceURL=board/index.js"
 ));
 require.register("board/verbsdesk.js", Function("exports, require, module",
-"var verbs = {\n\
+"var board;\n\
+\n\
+var verbs = {\n\
     get: {\n\
         pos: 0,\n\
         name: 'GET',\n\
@@ -2347,15 +2377,15 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         }\n\
     },\n\
 \n\
-    take: {\n\
+    put: {\n\
         pos: 1,\n\
-        name: 'TAKE',\n\
+        name: 'PUT',\n\
         \n\
         activate: function (options) {\n\
             var subject = options.board.subject;\n\
             options.callback = function () {\n\
-                if (typeof subject.take === 'function') {\n\
-                    subject.take(options);\n\
+                if (typeof subject.put === 'function') {\n\
+                    subject.put(options);\n\
                 }\n\
             };\n\
             verbs.go.activate(options);\n\
@@ -2364,7 +2394,13 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
 \n\
     use: {\n\
         pos: 2,\n\
-        name: 'USE',\n\
+        name: function () {\n\
+            if (board.handled !== null) {\n\
+                return 'USE ' + board.handled.name + ' WITH';\n\
+            } else {\n\
+                return 'USE';\n\
+            }\n\
+        },\n\
 \n\
         activate: function (options) {\n\
 \n\
@@ -2395,6 +2431,7 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         activate: function (options) {\n\
             var subject = options.board.subject;\n\
             options.callback = function () {\n\
+                console.log(subject, typeof subject.look === 'function');\n\
                 if (typeof subject.look === 'function') {\n\
                     subject.look(options);\n\
                 }\n\
@@ -2416,32 +2453,32 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
             };\n\
             verbs.go.activate(options);\n\
         }\n\
-    },\n\
+    }\n\
+\n\
 };\n\
 \n\
 function VerbsDesk(options) {\n\
     this.el = document.createElement('div');\n\
     this.el.setAttribute('class', 'verbs-desk');\n\
-    this.board = options.board;\n\
+    board = options.board;\n\
 }\n\
 \n\
 VerbsDesk.prototype.render = function () {\n\
     var verbsNames = Object.keys(verbs);\n\
-    var board = this.board;\n\
 \n\
     verbsNames.forEach(function (verbName) {\n\
         var el = document.createElement('div');\n\
         var verb = verbs[verbName];\n\
         \n\
         el.setAttribute('class', 'verb');\n\
-        el.appendChild(document.createTextNode(verb.name));\n\
+        el.appendChild(document.createTextNode(typeof verb.name === 'function' ? verb.name() : verb.name));\n\
         el.addEventListener('click', function () {\n\
             board.setVerb({verb: verb});\n\
         });\n\
         this.el.appendChild(el);\n\
     }, this);\n\
 \n\
-    this.board.setDefault({verb: verbs.go});\n\
+    board.setDefault({verb: verbs.go});\n\
     return this;\n\
 };\n\
 \n\
