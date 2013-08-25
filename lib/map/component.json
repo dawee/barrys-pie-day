@@ -8,6 +8,6 @@
     "gameponent/loop": "*",
     "component/clone": "*"
   },
-  "local": ["area"]
+  "local": ["area", "board"]
 
 }
