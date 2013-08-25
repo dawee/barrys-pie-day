@@ -1207,7 +1207,7 @@ Stadium.prototype.init = function (options) {\n\
         click: function () {\n\
             this.x = this.left;\n\
             board.setSubject(town);\n\
-            board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges'});\n\
+            board.notify({text: 'I won\\'t go until I didn\\'t talk to the judges', talker: 'barry'});\n\
         },\n\
         go: function () {}\n\
     });\n\
@@ -1295,7 +1295,28 @@ JudgeWoman.prototype.click = function () {\n\
 };\n\
 \n\
 JudgeWoman.prototype.take = function () {\n\
-    board.notify({text: 'She\\'s not my type'});\n\
+    board.notify({text: 'She\\'s not my type', talker: 'barry'});\n\
+};\n\
+\n\
+JudgeWoman.prototype.watch = function () {\n\
+    board.notify({text: 'She\\'s not my type', talker: 'barry'});\n\
+};\n\
+\n\
+JudgeWoman.prototype.talk = function () {\n\
+    board.talk({sentences: [\n\
+        {text: 'Hi', talker: 'barry'},\n\
+        {text: 'Hello darling !', talker: 'judge-woman'},\n\
+        {text: 'I want to be the only second of the competition', talker: 'barry'},\n\
+        {text: 'Sure my dear, and why would I do that for you ?', talker: 'judge-woman'},\n\
+        {text: 'Because I was faster than the other 9 dudes', talker: 'barry'},\n\
+        {text: 'I\\'m affraid I don\\'t care sweet heart', talker: 'judge-woman'},\n\
+        {text: '...', talker: 'judge-woman'},\n\
+        {text: 'Give me your phone number darling', talker: 'judge-woman'},\n\
+        {text: 'Wh... What ??', talker: 'barry'},\n\
+        {text: 'Give me your phone number and I\\'ll do anything you want', talker: 'judge-woman'},\n\
+        {text: '*wink*', talker: 'judge-woman'},\n\
+        {text: 'brrrrrrrrrr', talker: 'barry'},\n\
+    ]});\n\
 };\n\
 \n\
 \n\
@@ -1891,14 +1912,38 @@ function Board() {\n\
 }\n\
 \n\
 Board.prototype.notify = function (options) {\n\
-    if (!!this.notifyId) {\n\
-        clearTimeout(this.notifyId);\n\
-    }\n\
+    var callback = options.callback || function () {};\n\
     var dialogText = this.dialogText;\n\
+    var talker = options.talker || '';\n\
+    var delay = (options.text.split(' ').length) * 500;\n\
+    delay = delay < 2000 ? 2000 : delay;\n\
+    this.dialog.setAttribute('class', 'dialog ' + talker);\n\
     dialogText.data = options.text;\n\
     this.notifyId = setTimeout(function () {\n\
         dialogText.data = '';\n\
-    }, 2000);\n\
+        callback();\n\
+    }, delay);\n\
+};\n\
+\n\
+Board.prototype.talk = function (options) {\n\
+    this.hide();\n\
+    this.talkCallback = options.callback || function () {};\n\
+    this.sentences = options.sentences.reverse();\n\
+    this.showNextSentence();\n\
+};\n\
+\n\
+Board.prototype.showNextSentence = function() {\n\
+    if (this.sentences.length === 0) {\n\
+        this.show();\n\
+        this.talkCallback();\n\
+    } else {\n\
+        var sentence = this.sentences.pop();\n\
+        var that = this;\n\
+        sentence.callback = function () {\n\
+            that.showNextSentence();\n\
+        }\n\
+        this.notify(sentence);\n\
+    }\n\
 };\n\
 \n\
 Board.prototype.setDefault = function (options) {\n\
@@ -1957,7 +2002,8 @@ Board.prototype.activate = function () {\n\
         return;\n\
     }\n\
     this.verb.activate({board: this});\n\
-    this.reset({mode: this.mode});\n\
+    this.setVerb({verb: this.default});\n\
+    this.subject = null;\n\
 };\n\
 \n\
 Board.prototype.render = function () {\n\
@@ -2040,7 +2086,13 @@ require.register("board/verbsdesk.js", Function("exports, require, module",
         name: 'TALK TO',\n\
 \n\
         activate: function (options) {\n\
-\n\
+            var subject = options.board.subject;\n\
+            options.callback = function () {\n\
+                if (typeof subject.talk === 'function') {\n\
+                    subject.talk(options);\n\
+                }\n\
+            };\n\
+            verbs.go.activate(options);\n\
         }\n\
     },\n\
 };\n\
